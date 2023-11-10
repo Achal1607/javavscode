@@ -69,7 +69,7 @@ import { TLSSocket } from 'tls';
 import { InputStep, MultiStepInput } from './utils';
 import { env } from 'process';
 import { PropertiesView } from './propertiesView/propertiesView';
-import { openJDKSelectionView } from './jdkDownloader';
+import { JdkDownloader } from './jdkDownloader';
 
 const API_VERSION : string = "1.0";
 const SERVER_NAME : string = "Oracle Java SE Language Server";
@@ -832,7 +832,8 @@ function doActivateWithJDK(specifiedJDK: string | null, context: ExtensionContex
                     "Download JDK and setup automatically"
                 ).then( selection => {
                     if (selection === 'Download JDK and setup automatically') {
-                        openJDKSelectionView(log);
+                        const jdkDownloader = new JdkDownloader(log);
+                        jdkDownloader.openDownloaderView();
                     }
                 });
             }
@@ -1109,7 +1110,10 @@ function doActivateWithJDK(specifiedJDK: string | null, context: ExtensionContex
             }
         }));
         ctx.subscriptions.push(vscode.commands.registerCommand(COMMAND_PREFIX + ".select.editor.projects", () => revealActiveEditor()));
-        ctx.subscriptions.push(vscode.commands.registerCommand(COMMAND_PREFIX + ".download.jdk", () => openJDKSelectionView(log)));
+        ctx.subscriptions.push(vscode.commands.registerCommand(COMMAND_PREFIX + ".download.jdk", () => {
+            const jdkDownloader = new JdkDownloader(log);
+            jdkDownloader.openDownloaderView();
+        }));
 
         // attempt to reveal NOW:
         if (netbeansConfig.get("revealActiveInProjects")) {
