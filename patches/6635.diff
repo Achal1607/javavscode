@@ -1,0 +1,104 @@
+diff --git a/java/java.hints/src/org/netbeans/modules/java/hints/bugs/UnusedAssignmentOrBranch.java b/java/java.hints/src/org/netbeans/modules/java/hints/bugs/UnusedAssignmentOrBranch.java
+index 1ec8ac0061..0e13f8e6d6 100644
+--- a/java/java.hints/src/org/netbeans/modules/java/hints/bugs/UnusedAssignmentOrBranch.java
++++ b/java/java.hints/src/org/netbeans/modules/java/hints/bugs/UnusedAssignmentOrBranch.java
+@@ -31,6 +31,7 @@ import java.util.List;
+ import java.util.Set;
+ import javax.lang.model.element.Element;
+ import javax.lang.model.element.ElementKind;
++import javax.lang.model.element.ExecutableElement;
+ import javax.lang.model.type.TypeKind;
+ import javax.lang.model.type.TypeMirror;
+ import org.netbeans.api.java.source.CompilationInfo;
+@@ -133,25 +134,44 @@ public class UnusedAssignmentOrBranch {
+         @TriggerPattern("$mods$ $type $var = $value;")
+     })
+     public static ErrorDescription unusedAssignment(final HintContext ctx) {
++        final CompilationInfo info = ctx.getInfo();
++        Element var = info.getTrees().getElement(ctx.getVariables().get("$var"));
++
++        if (var == null || !LOCAL_VARIABLES.contains(var.getKind()) ||
++            isImplicitParamOfRecordCanonicalConstructor(info, var)) {
++            return null;
++        }
++
+         final String unusedAssignmentLabel = NbBundle.getMessage(UnusedAssignmentOrBranch.class, "LBL_UNUSED_ASSIGNMENT_LABEL");
+         Pair<Set<Tree>, Set<Element>> computedAssignments = computeUsedAssignments(ctx);
+         
+         if (ctx.isCanceled() || computedAssignments == null) return null;
+ 
+-        final CompilationInfo info = ctx.getInfo();
+         final Set<Tree> usedAssignments = computedAssignments.first();
+         final Set<Element> usedVariables = computedAssignments.second();
+-        Element var = info.getTrees().getElement(ctx.getVariables().get("$var"));
+         TreePath valuePath = ctx.getVariables().get("$value");
+         Tree value = (valuePath == null ? ctx.getPath() : valuePath).getLeaf();
+ 
+-        if (var != null && LOCAL_VARIABLES.contains(var.getKind()) && !usedAssignments.contains(value) && usedVariables.contains(var)) {
++        if (!usedAssignments.contains(value) && usedVariables.contains(var)) {
+             return ErrorDescriptionFactory.forTree(ctx, value, unusedAssignmentLabel);
+         }
+ 
+         return null;
+     }
+-    
++
++    private static boolean isImplicitParamOfRecordCanonicalConstructor(CompilationInfo info, Element el) {
++        Element enclosingElement = el.getEnclosingElement();
++
++        if (enclosingElement.getKind() != ElementKind.CONSTRUCTOR) {
++            return false;
++        }
++
++        ExecutableElement constr = (ExecutableElement) enclosingElement;
++
++        return info.getElements().isCompactConstructor(constr) &&
++               constr.getParameters().contains(el);
++    }
++
+     private static boolean mayHaveSideEffects(HintContext ctx, TreePath path) {
+         SideEffectVisitor visitor = new SideEffectVisitor(ctx).stopOnUnknownMethods(true);
+         Tree culprit = null;
+diff --git a/java/java.hints/test/unit/src/org/netbeans/modules/java/hints/bugs/UnusedAssignmentOrBranchTest.java b/java/java.hints/test/unit/src/org/netbeans/modules/java/hints/bugs/UnusedAssignmentOrBranchTest.java
+index c03f5d9fc7..94532dbf04 100644
+--- a/java/java.hints/test/unit/src/org/netbeans/modules/java/hints/bugs/UnusedAssignmentOrBranchTest.java
++++ b/java/java.hints/test/unit/src/org/netbeans/modules/java/hints/bugs/UnusedAssignmentOrBranchTest.java
+@@ -18,6 +18,7 @@
+  */
+ package org.netbeans.modules.java.hints.bugs;
+ 
++import org.junit.Assume;
+ import org.netbeans.junit.NbTestCase;
+ import org.netbeans.modules.java.hints.test.api.HintTest;
+ 
+@@ -211,4 +212,30 @@ public class UnusedAssignmentOrBranchTest extends NbTestCase {
+                 .run(UnusedAssignmentOrBranch.class)
+                 .assertWarnings();
+     }
++
++    public void testRecordCompactConstructor() throws Exception {
++        Assume.assumeTrue(isRecordClassPresent());
++
++        HintTest
++                .create()
++                .input("package test;\n" +
++                       "\n" +
++                       "public record Test(int i, int j) {\n" +
++                       "    public Test {\n" +
++                       "        i = -i;\n" +
++                       "    }\n" +
++                       "}")
++                .sourceLevel("21")
++                .run(UnusedAssignmentOrBranch.class)
++                .assertWarnings();
++    }
++
++    private boolean isRecordClassPresent() {
++        try {
++            Class.forName("java.lang.Record");
++            return true;
++        } catch (ClassNotFoundException ex) {
++            return false;
++        }
++    }
+ }
