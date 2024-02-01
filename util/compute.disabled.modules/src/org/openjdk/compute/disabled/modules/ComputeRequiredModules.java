@@ -69,12 +69,15 @@ public class ComputeRequiredModules implements ArgsProcessor {
             // Tests modules
             "org.netbeans.modules.junit.ui",
             "org.netbeans.modules.testng.ui",
-            // Debug issue
-            "org.netbeans.modules.masterfs.linux",
-            "org.netbeans.modules.masterfs.macosx",
+            "org.netbeans.modules.maven.junit.ui",
+            "org.netbeans.modules.testng.maven",
+            "org.netbeans.modules.maven.junit",
+            // Debugger issue
             "org.netbeans.modules.masterfs.nio2",
             "org.netbeans.modules.masterfs.ui",
-            "org.netbeans.modules.masterfs.windows"
+            // Maven
+            "org.netbeans.modules.maven.embedder",
+            "org.netbeans.modules.maven"
         };
         Set<String> rootModulesSet = new HashSet<>(Arrays.asList(rootModules));
         Set<ModuleInfo> todo = new HashSet<>();
