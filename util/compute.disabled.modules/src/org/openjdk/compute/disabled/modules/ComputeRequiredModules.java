@@ -1,7 +1,11 @@
 package org.openjdk.compute.disabled.modules;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,58 +33,103 @@ public class ComputeRequiredModules implements ArgsProcessor {
     public void process(Env env) throws CommandException {
         if (targetProperties != null) {
             try {
-                computeDependencies();
+                String[] rootModulesLite = {
+                    //the basic server:
+                    "org.netbeans.modules.java.lsp.server", //the Java LSP Server
+                    //support for OSGi modules in nbcode:
+                    "org.netbeans.modules.netbinox", //OSGi modules support
+                    //dependencies of nbcode.integration:
+                    "org.netbeans.modules.project.dependency", //used by nbcode.integration
+                    "org.netbeans.modules.updatecenters", //used by nbcode.integration
+                    "org.netbeans.swing.laf.flatlaf", //used by nbcode.integration
+                    "org.netbeans.core.execution", //used by nbcode.integration, to fulfil org.openide.execution.ExecutionEngine.defaultLookup
+                    //additional dependencies needed to make things work:
+                    "org.netbeans.modules.autoupdate.cli", //to get --modules option (used by nbcode.ts
+                    "org.netbeans.modules.editor", //DocumentFactory
+                    "org.netbeans.modules.editor.mimelookup.impl", //so that MimeLookup from layers works
+                    "org.netbeans.modules.lexer.nbbridge", //so that lexer(s) work
+                    "org.netbeans.modules.java.j2seplatform", //so that JRT FS works
+                    "org.netbeans.libs.nbjavacapi", // nbjavac module
+                    //58 MB
+                    // Used these modules for autocompletion
+                    "org.netbeans.modules.editor.autosave",
+                    "org.netbeans.modules.editor.bookmarks",
+                    "org.netbeans.modules.editor.macros",
+                    "org.netbeans.modules.autoupdate.ui",
+                    // 58.8 MB
+                    // Tests modules
+                    "org.netbeans.modules.junit.ui",
+                    "org.netbeans.modules.testng.ui",
+                    // Debug issue
+                    "org.netbeans.modules.masterfs.nio2",
+                    "org.netbeans.modules.masterfs.ui"
+                };
+                String[] rootModulesMaven = {
+                    "org.netbeans.modules.maven.hints",
+                    "org.netbeans.modules.maven.model",
+                    "org.netbeans.modules.maven.indexer.ui",
+                    "org.netbeans.modules.maven.junit.ui",
+                    "org.netbeans.modules.maven.junit",
+                    "org.netbeans.modules.maven.apisupport",
+                    "org.netbeans.modules.maven.profiler",
+                    "org.netbeans.modules.maven.embedder",
+                    "org.netbeans.modules.maven.indexer",
+                    "org.netbeans.modules.apisupport.installer.maven",
+                    "org.netbeans.api.maven",
+                    "org.netbeans.modules.maven.persistence",
+                    "org.netbeans.modules.maven",
+                    "org.netbeans.modules.maven.htmlui"
+                };
+                String[] rootModulesGradle = {
+                    "org.netbeans.modules.gradle.java"
+                };
+                Set<String> liteDependencies = computeDependencies(rootModulesLite, "Lite");
+                Set<String> mavenDependencies = computeDependencies(rootModulesMaven, "Maven");
+                Set<String> gradleDependencies = computeDependencies(rootModulesGradle, "Gradle");
+
+                // Remove modules that are in both maven and gradle extensions, place them in the lite extension as well.
+                String[] modulesToBeInLiteArr = gradleDependencies.stream().filter(cnbb -> mavenDependencies.contains(cnbb)).collect(Collectors.joining("\n")).split("\n");
+                Set<String> modulesToBeInLite = new HashSet<>(Arrays.asList(modulesToBeInLiteArr));
+                String notPresentInLite = modulesToBeInLite.stream().filter(cnbb -> !liteDependencies.contains(cnbb)).collect(Collectors.joining("\n"));
+                
+                // Remove modules from maven and gradle list that are in both and also that is present in lite list 
+                String enabledModulesInMaven = mavenDependencies.stream().filter(cnbb -> !liteDependencies.contains(cnbb) && !modulesToBeInLite.contains(cnbb)).collect(Collectors.joining("\n"));
+                String enabledModulesInGradle = gradleDependencies.stream().filter(cnbb -> !liteDependencies.contains(cnbb) && !modulesToBeInLite.contains(cnbb)).collect(Collectors.joining("\n"));
+                
+                createAndWriteToFile(enabledModulesInMaven, "modulesToEnableMaven");
+                createAndWriteToFile(enabledModulesInGradle, "modulesToEnableGradle");
+                createAndWriteToFile(notPresentInLite +"\n"+ liteDependencies.toString().replaceAll(",", "\n"), "modulesToEnableLite");
             } catch (IOException ex) {
                 throw (CommandException) new CommandException(1).initCause(ex);
             }
         }
+        LifecycleManager.getDefault().exit();
     }
 
-    @Arg(longName="compute-disabled-modules")
-    @Description(shortDescription="#DESC_ComputeDisabledModules")
-    @NbBundle.Messages("DESC_ComputeDisabledModules=Compue and set disabled modules")
+    @Arg(longName = "compute-disabled-modules")
+    @Description(shortDescription = "#DESC_ComputeDisabledModules")
+    @NbBundle.Messages("DESC_ComputeDisabledModules=Compute and set disabled modules")
     public String targetProperties;
 
-    private void computeDependencies() throws IOException {
-        String[] rootModules = {
-            //the basic server:
-            "org.netbeans.modules.java.lsp.server", //the Java LSP Server
-            //support for OSGi modules in nbcode:
-            "org.netbeans.modules.netbinox", //OSGi modules support
-            //dependencies of nbcode.integration:
-            "org.netbeans.modules.project.dependency", //used by nbcode.integration
-            "org.netbeans.modules.updatecenters", //used by nbcode.integration
-            "org.netbeans.swing.laf.flatlaf", //used by nbcode.integration
-            "org.netbeans.core.execution", //used by nbcode.integration, to fulfil org.openide.execution.ExecutionEngine.defaultLookup
-            //additional dependencies needed to make things work:
-            "org.netbeans.modules.autoupdate.cli", //to get --modules option (used by nbcode.ts
-            "org.netbeans.modules.editor", //DocumentFactory
-            "org.netbeans.modules.editor.mimelookup.impl", //so that MimeLookup from layers works
-            "org.netbeans.modules.lexer.nbbridge", //so that lexer(s) work
-            "org.netbeans.modules.java.j2seplatform", //so that JRT FS works
-            "org.netbeans.libs.nbjavacapi", // nbjavac module
-            //58 MB
-            // Used these modules for autocompletion
-            "org.netbeans.modules.editor.autosave",
-            "org.netbeans.modules.editor.bookmarks",
-            "org.netbeans.modules.editor.macros", 
-            "org.netbeans.modules.autoupdate.ui",
-            // 58.8 MB
-            // Tests modules
-            "org.netbeans.modules.junit.ui",
-            "org.netbeans.modules.testng.ui",
-            // Debug issue
-            "org.netbeans.modules.masterfs.linux",
-            "org.netbeans.modules.masterfs.macosx",
-            "org.netbeans.modules.masterfs.nio2",
-            "org.netbeans.modules.masterfs.ui",
-            "org.netbeans.modules.masterfs.windows"
-        };
+    private void createAndWriteToFile(String content, String fileName) {
+        try {
+            String filePath = "/tmp/" + fileName + ".txt";
+            File liteFile = new File(filePath);
+            liteFile.createNewFile();
+            FileWriter myWriter = new FileWriter(filePath);
+            myWriter.write(content);
+            myWriter.close();
+        } catch (IOException ex) {
+            System.out.println("ERROR!!!");
+            System.out.println(ex.toString());
+        }
+    }
+
+    private Set<String> computeDependencies(String[] rootModules, String fileName) throws IOException {
         Set<String> rootModulesSet = new HashSet<>(Arrays.asList(rootModules));
         Set<ModuleInfo> todo = new HashSet<>();
         Map<String, ModuleInfo> codeNameBase2ModuleInfo = new HashMap<>();
         Map<String, Set<String>> capability2Modules = new HashMap<>();
-
         for (ModuleInfo mi : Lookup.getDefault().lookupAll(ModuleInfo.class)) {
             codeNameBase2ModuleInfo.put(mi.getCodeNameBase(), mi);
             Arrays.asList(mi.getProvides()).forEach(p -> capability2Modules.computeIfAbsent(p, b -> new HashSet<>()).add(mi.getCodeNameBase()));
@@ -89,7 +138,7 @@ public class ComputeRequiredModules implements ArgsProcessor {
                 todo.add(mi);
             }
         }
-        
+
         if (!rootModulesSet.isEmpty()) {
             throw new IllegalStateException("not found: " + rootModulesSet);
         }
@@ -98,7 +147,7 @@ public class ComputeRequiredModules implements ArgsProcessor {
         Set<String> seenNeeds = new HashSet<>();
         Set<String> seenRequires = new HashSet<>();
         Set<String> seenRecommends = new HashSet<>();
-        
+
         while (!todo.isEmpty()) {
             ModuleInfo currentModule = todo.iterator().next();
 
@@ -125,7 +174,9 @@ public class ComputeRequiredModules implements ArgsProcessor {
                         case Dependency.TYPE_NEEDS:
                             if (seenNeeds.add(d.getName())) {
                                 Set<String> fullfillingModules = capability2Modules.get(d.getName());
-                                if (fullfillingModules.size() == 1) {
+                                if (fullfillingModules == null) {
+                                    System.err.println("module: " + currentModule.getCodeNameBase() + ", needs capability: '" + d.getName() + "', but there are no modules providing this capability");
+                                } else if (fullfillingModules.size() == 1) {
                                     todo.add(codeNameBase2ModuleInfo.get(fullfillingModules.iterator().next()));
                                 } else {
                                     System.err.println("module: " + currentModule.getCodeNameBase() + ", needs capability: '" + d.getName() + "', modules that provide that capability are: " + fullfillingModules);
@@ -135,7 +186,9 @@ public class ComputeRequiredModules implements ArgsProcessor {
                         case Dependency.TYPE_REQUIRES:
                             if (seenRequires.add(d.getName())) {
                                 Set<String> fullfillingModules = capability2Modules.get(d.getName());
-                                if (fullfillingModules.size() == 1) {
+                                if (fullfillingModules == null) {
+                                    System.err.println("module: " + currentModule.getCodeNameBase() + ", needs capability: '" + d.getName() + "', but there are no modules providing this capability");
+                                } else if (fullfillingModules.size() == 1) {
                                     todo.add(codeNameBase2ModuleInfo.get(fullfillingModules.iterator().next()));
                                 } else {
                                     System.err.println("module: " + currentModule.getCodeNameBase() + ", requires capability: '" + d.getName() + "', modules that provide that capability are: " + fullfillingModules);
@@ -161,8 +214,13 @@ public class ComputeRequiredModules implements ArgsProcessor {
         String disabledModules = codeNameBase2ModuleInfo.keySet().stream().filter(cnbb -> !requiredCNBBases.contains(cnbb)).collect(Collectors.joining(","));
         EditableProperties props = new EditableProperties(false);
 
-        try (InputStream in = new FileInputStream(targetProperties)) {
-            props.load(in);
+        String rootPath = "/Users/atalati/dependenciesNB/";
+        createAndWriteToFile(requiredCNBBases.toString().replaceAll(",", "\n"), fileName);
+
+        if (Files.isReadable(Paths.get(targetProperties))) {
+            try (InputStream in = new FileInputStream(targetProperties)) {
+                props.load(in);
+            }
         }
 
         props.put("disabled.modules", disabledModules);
@@ -171,7 +229,7 @@ public class ComputeRequiredModules implements ArgsProcessor {
             props.store(out);
         }
 
-        LifecycleManager.getDefault().exit();
+        return requiredCNBBases;
     }
 
 }
