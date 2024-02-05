@@ -1,0 +1,62 @@
+{
+	"name": "oracle-maven",
+	"displayName": "Oracle Maven Extension",
+	"description": "Oracle Java Platform Extension for Visual Studio Code",
+	"author": "Oracle",
+	"license": "Apache 2.0",
+	"version": "0.1.0",
+	"preview": false,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/oracle/javavscode"
+	},
+	"publisher": "Oracle",
+	"icon": "images/logo.png",
+	"categories": [
+		"Programming Languages",
+		"Debuggers",
+		"Testing",
+		"Other"
+	],
+	"keywords": [
+		"multi-root ready"
+	],
+	"engines": {
+		"vscode": "^1.76.0"
+	},
+	"activationEvents": [
+		"workspaceContains:pom.xml"
+	],
+	"main": "./out/extension.js",
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./;",
+		"watch": "tsc -watch -p ./",
+		"test": "node ./out/test/runTest.js",
+		"nbcode": "node ./out/nbcode.js",
+		"nbjavac": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install .*nbjavac.*",
+		"apisupport": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install '(org.netbeans.libs.xerces|org.netbeans.modules.editor.structure|org.netbeans.modules.xml|org.netbeans.modules.xml.axi|org.netbeans.modules.xml.retriever|org.netbeans.modules.xml.schema.model|org.netbeans.modules.xml.tax|org.netbeans.modules.xml.text|org.netbeans.modules.ant.browsetask|.*apisupport.*|org.netbeans.modules.debugger.jpda.ant)' && node ./out/nbcode.js -J-Dnetbeans.close=true --modules --enable .*apisupport.ant",
+		"build-nbcode": "cd .. && chmod 744 buildModules.sh && ./buildModules.sh /tmp/modulesToEnableMaven.txt maven-extension /maven-extension/nbcode/",
+		"package": "chmod 744 ../packageExtension.sh && .././packageExtension.sh oracle-maven 0.1.0"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.1.1",
+		"@types/mocha": "^9.0.0",
+		"@types/node": "^13.11.0",
+		"@types/ps-node": "^0.1.0",
+		"@types/vscode": "^1.76.0",
+		"@types/vscode-webview": "^1.57.1",
+		"@vscode/codicons": "0.0.29",
+		"glob": "^7.1.6",
+		"mocha": "^9.1.2",
+		"ps-node": "^0.1.6",
+		"typescript": "^4.6.4",
+		"vscode-test": "^1.3.0"
+	},
+	"dependencies": {
+		"@vscode/debugadapter": "1.55.1",
+		"@vscode/webview-ui-toolkit": "^1.2.2",
+		"jsonc-parser": "3.2.0",
+		"vscode-languageclient": "^8.1.0"
+	}
+}

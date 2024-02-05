@@ -99,6 +99,19 @@ public class ComputeRequiredModules implements ArgsProcessor {
                 createAndWriteToFile(enabledModulesInMaven, "modulesToEnableMaven");
                 createAndWriteToFile(enabledModulesInGradle, "modulesToEnableGradle");
                 createAndWriteToFile(notPresentInLite +"\n"+ liteDependencies.toString().replaceAll(",", "\n"), "modulesToEnableLite");
+
+                // Compute disabled modules
+                Map<String, ModuleInfo> codeNameBase2ModuleInfo = new HashMap<>();
+                Map<String, Set<String>> capability2Modules = new HashMap<>();
+                for (ModuleInfo mi : Lookup.getDefault().lookupAll(ModuleInfo.class)) {
+                    codeNameBase2ModuleInfo.put(mi.getCodeNameBase(), mi);
+                    Arrays.asList(mi.getProvides()).forEach(p -> capability2Modules.computeIfAbsent(p, b -> new HashSet<>()).add(mi.getCodeNameBase()));
+                }
+                modulesToBeInLite.addAll(liteDependencies);
+                String disabledModules = codeNameBase2ModuleInfo.keySet().stream().filter(cnbb -> !modulesToBeInLite.contains(cnbb)).collect(Collectors.joining(","));
+                createAndWriteToFile(disabledModules, "modulesToBeDisabledLite");
+
+
             } catch (IOException ex) {
                 throw (CommandException) new CommandException(1).initCause(ex);
             }
@@ -214,7 +227,6 @@ public class ComputeRequiredModules implements ArgsProcessor {
         String disabledModules = codeNameBase2ModuleInfo.keySet().stream().filter(cnbb -> !requiredCNBBases.contains(cnbb)).collect(Collectors.joining(","));
         EditableProperties props = new EditableProperties(false);
 
-        String rootPath = "/Users/atalati/dependenciesNB/";
         createAndWriteToFile(requiredCNBBases.toString().replaceAll(",", "\n"), fileName);
 
         if (Files.isReadable(Paths.get(targetProperties))) {
