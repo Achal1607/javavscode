@@ -13,7 +13,7 @@ for m in */*/manifest.mf; do
     
     # Check if the module name is not empty
     if [ "x$CNB" != "x" ]; then
-        # Check if the module name exists in the list file '$1'
+        # Check if the module name exists in the list file 'modules list'
         if grep -x ${CNB} $1 >/dev/null 2>&1; then
             echo "$1"
             # If module name exists, change directory to the module and build using Ant with specified cluster directory
@@ -22,8 +22,12 @@ for m in */*/manifest.mf; do
     fi
 done
 
-rm -rf "$3"
+rm -rf "../$3"
 
-# Copy the built files from 'nbbuild/netbeans/"$2"' to "$3"
+# Copy the built files from 'nbbuild/netbeans/"$2"' to "extension dir"
 cp -r nbbuild/netbeans/"$2" "../$3"
+
+cd "../$3"
+mkdir -p $2
+mv ./* $2
 )

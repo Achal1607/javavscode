@@ -48,7 +48,13 @@ function find(info: LaunchInfo): string {
     if (os.platform() !== 'win32') {
         fs.chmodSync(path.join(info.extensionPath, "nbcode", "bin", nbcode), "744");
         fs.chmodSync(path.join(info.extensionPath, "nbcode", "platform", "lib", "nbexec.sh"), "744");
-        // fs.chmodSync(path.join(info.extensionPath, "nbcode", "java", "maven", "bin", "mvn.sh"), "744");
+        const mavenExtPath = info.clusters.filter(el => el.includes("oracle-maven"));
+        if (mavenExtPath.length) {
+            const path_maven_bin = path.join(mavenExtPath[0], "maven", "bin");
+            if (fs.existsSync(path.join(path_maven_bin,'mvn.sh'))) {
+                fs.chmodSync(path.join(path_maven_bin,'mvn.sh'), "744");
+            }
+        }
     }
     return nbcodePath;
 }

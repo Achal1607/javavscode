@@ -92,7 +92,7 @@
                 <isset property="metabuild.hash" />
             </not>
         </condition>
-        <property name="vsix.version" value="0.1.0"/>
+        <property name="vsix.version" value="22.0.0"/>
 
         <exec executable="npm${cmd.suffix}" failonerror="true" dir="vscode">
             <arg value="--allow-same-version"/>

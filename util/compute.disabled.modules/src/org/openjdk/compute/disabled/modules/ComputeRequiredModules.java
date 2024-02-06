@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.netbeans.api.sendopts.CommandException;
 import org.netbeans.spi.sendopts.Arg;
 import org.netbeans.spi.sendopts.ArgsProcessor;
@@ -81,36 +82,33 @@ public class ComputeRequiredModules implements ArgsProcessor {
                     "org.netbeans.modules.maven.htmlui"
                 };
                 String[] rootModulesGradle = {
-                    "org.netbeans.modules.gradle.java"
+                    "org.netbeans.modules.gradle.java",
+                    "org.netbeans.modules.gradle.test",
+                    "org.netbeans.modules.gradle.editor",
+                    "org.netbeans.modules.gradle.dists",
+                    "org.netbeans.modules.gradle.persistence"
                 };
                 Set<String> liteDependencies = computeDependencies(rootModulesLite, "Lite");
                 Set<String> mavenDependencies = computeDependencies(rootModulesMaven, "Maven");
                 Set<String> gradleDependencies = computeDependencies(rootModulesGradle, "Gradle");
 
-                // Remove modules that are in both maven and gradle extensions, place them in the lite extension as well.
-                String[] modulesToBeInLiteArr = gradleDependencies.stream().filter(cnbb -> mavenDependencies.contains(cnbb)).collect(Collectors.joining("\n")).split("\n");
-                Set<String> modulesToBeInLite = new HashSet<>(Arrays.asList(modulesToBeInLiteArr));
-                String notPresentInLite = modulesToBeInLite.stream().filter(cnbb -> !liteDependencies.contains(cnbb)).collect(Collectors.joining("\n"));
-                
-                // Remove modules from maven and gradle list that are in both and also that is present in lite list 
-                String enabledModulesInMaven = mavenDependencies.stream().filter(cnbb -> !liteDependencies.contains(cnbb) && !modulesToBeInLite.contains(cnbb)).collect(Collectors.joining("\n"));
-                String enabledModulesInGradle = gradleDependencies.stream().filter(cnbb -> !liteDependencies.contains(cnbb) && !modulesToBeInLite.contains(cnbb)).collect(Collectors.joining("\n"));
-                
+                // Remove modules that are in both maven and gradle extensions, place them in the lite extension as a common place.
+                Set<String> modulesToBeInLite = gradleDependencies.stream().filter(cnbb -> mavenDependencies.contains(cnbb)).collect(Collectors.toSet());
+                liteDependencies.addAll(modulesToBeInLite);
+
+                // Remove modules from maven and gradle list that are  already present in lite list 
+                String enabledModulesInMaven = mavenDependencies.stream().filter(cnbb -> !liteDependencies.contains(cnbb)).collect(Collectors.joining("\n"));
+                String enabledModulesInGradle = gradleDependencies.stream().filter(cnbb -> !liteDependencies.contains(cnbb)).collect(Collectors.joining("\n"));
+
                 createAndWriteToFile(enabledModulesInMaven, "modulesToEnableMaven");
                 createAndWriteToFile(enabledModulesInGradle, "modulesToEnableGradle");
-                createAndWriteToFile(notPresentInLite +"\n"+ liteDependencies.toString().replaceAll(",", "\n"), "modulesToEnableLite");
+                createAndWriteToFile(liteDependencies.stream().collect(Collectors.joining("\n")), "modulesToEnableLite");
 
                 // Compute disabled modules
-                Map<String, ModuleInfo> codeNameBase2ModuleInfo = new HashMap<>();
-                Map<String, Set<String>> capability2Modules = new HashMap<>();
-                for (ModuleInfo mi : Lookup.getDefault().lookupAll(ModuleInfo.class)) {
-                    codeNameBase2ModuleInfo.put(mi.getCodeNameBase(), mi);
-                    Arrays.asList(mi.getProvides()).forEach(p -> capability2Modules.computeIfAbsent(p, b -> new HashSet<>()).add(mi.getCodeNameBase()));
-                }
-                modulesToBeInLite.addAll(liteDependencies);
-                String disabledModules = codeNameBase2ModuleInfo.keySet().stream().filter(cnbb -> !modulesToBeInLite.contains(cnbb)).collect(Collectors.joining(","));
+                Map<String, ModuleInfo> allDependencies = getAllDependencies();
+                String disabledModules = allDependencies.keySet().stream().filter(cnbb -> !liteDependencies.contains(cnbb)).collect(Collectors.joining(","));
                 createAndWriteToFile(disabledModules, "modulesToBeDisabledLite");
-
+                updateDisabledModulesList(disabledModules);
 
             } catch (IOException ex) {
                 throw (CommandException) new CommandException(1).initCause(ex);
@@ -124,6 +122,16 @@ public class ComputeRequiredModules implements ArgsProcessor {
     @NbBundle.Messages("DESC_ComputeDisabledModules=Compute and set disabled modules")
     public String targetProperties;
 
+    private Map<String, ModuleInfo> getAllDependencies() {
+        Map<String, ModuleInfo> codeNameBase2ModuleInfo = new HashMap<>();
+        Map<String, Set<String>> capability2Modules = new HashMap<>();
+        for (ModuleInfo mi : Lookup.getDefault().lookupAll(ModuleInfo.class)) {
+            codeNameBase2ModuleInfo.put(mi.getCodeNameBase(), mi);
+            Arrays.asList(mi.getProvides()).forEach(p -> capability2Modules.computeIfAbsent(p, b -> new HashSet<>()).add(mi.getCodeNameBase()));
+        }
+        return codeNameBase2ModuleInfo;
+    }
+
     private void createAndWriteToFile(String content, String fileName) {
         try {
             String filePath = "/tmp/" + fileName + ".txt";
@@ -133,9 +141,29 @@ public class ComputeRequiredModules implements ArgsProcessor {
             myWriter.write(content);
             myWriter.close();
         } catch (IOException ex) {
-            System.out.println("ERROR!!!");
             System.out.println(ex.toString());
         }
+    }
+
+    private void updateDisabledModulesList(String disabledModules) {
+        try {
+            EditableProperties props = new EditableProperties(false);
+
+            if (Files.isReadable(Paths.get(targetProperties))) {
+                try (InputStream in = new FileInputStream(targetProperties)) {
+                    props.load(in);
+                }
+            }
+
+            props.put("disabled.modules", disabledModules);
+
+            try (OutputStream out = new FileOutputStream(targetProperties)) {
+                props.store(out);
+            }
+        } catch (IOException ex) {
+            System.out.println(ex.toString());
+        }
+
     }
 
     private Set<String> computeDependencies(String[] rootModules, String fileName) throws IOException {
@@ -224,22 +252,7 @@ public class ComputeRequiredModules implements ArgsProcessor {
         }
 
         Set<String> requiredCNBBases = allDependencies.stream().map(mi -> mi.getCodeNameBase()).collect(Collectors.toSet());
-        String disabledModules = codeNameBase2ModuleInfo.keySet().stream().filter(cnbb -> !requiredCNBBases.contains(cnbb)).collect(Collectors.joining(","));
-        EditableProperties props = new EditableProperties(false);
-
         createAndWriteToFile(requiredCNBBases.toString().replaceAll(",", "\n"), fileName);
-
-        if (Files.isReadable(Paths.get(targetProperties))) {
-            try (InputStream in = new FileInputStream(targetProperties)) {
-                props.load(in);
-            }
-        }
-
-        props.put("disabled.modules", disabledModules);
-
-        try (OutputStream out = new FileOutputStream(targetProperties)) {
-            props.store(out);
-        }
 
         return requiredCNBBases;
     }

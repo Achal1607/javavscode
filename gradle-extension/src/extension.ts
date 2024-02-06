@@ -30,7 +30,7 @@ function handleLog(log: OutputChannel, msg: string): void {
 }
 
 export async function activate(context: ExtensionContext) {
-    await context.extension.activate();
+    // await context.extension.activate();
     let log = window.createOutputChannel(SERVER_NAME);
     if (context.extension.isActive) {
         handleLog(log, "Activated Gradle extension");
