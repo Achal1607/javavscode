@@ -715,15 +715,17 @@
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./; node ./esbuild.js",
 		"watch": "tsc -watch -p ./ | node ./esbuild.js --watch",
-		"test": "node ./out/test/runTest.js",
+		"test": "rm -rf out/ && npm run compile && node ./out/test/runTest.js",
+		"ui-test": "export TEST_RESOURCES=\"./test-resources\" && touch LICENSE && rm -rf .test-extensions && extest setup-and-run -e .test-extensions './out/test/ui-test/*.ui-test.js'",
 		"nbcode": "node ./out/nbcode.js",
 		"nbjavac": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install .*nbjavac.*",
-		"apisupport": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install '(org.netbeans.libs.xerces|org.netbeans.modules.editor.structure|org.netbeans.modules.xml|org.netbeans.modules.xml.axi|org.netbeans.modules.xml.retriever|org.netbeans.modules.xml.schema.model|org.netbeans.modules.xml.tax|org.netbeans.modules.xml.text|org.netbeans.modules.ant.browsetask|.*apisupport.*|org.netbeans.modules.debugger.jpda.ant)' && node ./out/nbcode.js -J-Dnetbeans.close=true --modules --enable .*apisupport.ant"
+		"apisupport": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install '(org.netbeans.libs.xerces|org.netbeans.modules.editor.structure|org.netbeans.modules.xml|org.netbeans.modules.xml.axi|org.netbeans.modules.xml.retriever|org.netbeans.modules.xml.schema.model|org.netbeans.modules.xml.tax|org.netbeans.modules.xml.text|org.netbeans.modules.ant.browsetask|.*apisupport.*|org.netbeans.modules.debugger.jpda.ant)' && node ./out/nbcode.js -J-Dnetbeans.close=true --modules --enable .*apisupport.ant",
+		"all-test": "npm run test;npm run ui-test"
 	},
-	"devDependencies": {
+"devDependencies": {
 		"@types/glob": "^7.1.1",
 		"@types/mocha": "^9.0.0",
-		"@types/node": "^13.11.0",
+		"@types/node": "^18.19.1",
 		"@types/ps-node": "^0.1.0",
 		"@types/vscode": "^1.76.0",
 		"@types/vscode-webview": "^1.57.1",
@@ -733,7 +735,8 @@
 		"mocha": "^9.1.2",
 		"ps-node": "^0.1.6",
 		"typescript": "^4.6.4",
-		"vscode-test": "^1.3.0"
+		"vscode-test": "^1.3.0",
+		"vscode-extension-tester": "7.1.1"
 	},
 	"dependencies": {
 		"@vscode/debugadapter": "1.55.1",

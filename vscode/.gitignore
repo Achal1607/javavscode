@@ -3,3 +3,7 @@ node_modules
 out
 nbproject
 .vscode-test/
+test-resources/
+oracle-java*
+LICENSE
+.test-extensions/

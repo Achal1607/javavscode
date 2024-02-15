@@ -153,7 +153,7 @@
         <exec executable="npm${cmd.suffix}" failonerror="true" dir="vscode">
             <arg value="--allow-same-version"/>
             <arg value="run" />
-            <arg value="test" />
+            <arg value="all-test" />
         </exec>
         <exec executable="npm${cmd.suffix}" failonerror="true" dir="vscode">
             <arg value="--allow-same-version"/>
