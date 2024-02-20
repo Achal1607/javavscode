@@ -721,7 +721,7 @@
 		"nbjavac": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install .*nbjavac.*",
 		"apisupport": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install '(org.netbeans.libs.xerces|org.netbeans.modules.editor.structure|org.netbeans.modules.xml|org.netbeans.modules.xml.axi|org.netbeans.modules.xml.retriever|org.netbeans.modules.xml.schema.model|org.netbeans.modules.xml.tax|org.netbeans.modules.xml.text|org.netbeans.modules.ant.browsetask|.*apisupport.*|org.netbeans.modules.debugger.jpda.ant)' && node ./out/nbcode.js -J-Dnetbeans.close=true --modules --enable .*apisupport.ant",
 		"all-test": "npm run ui-test && npm run test",
-		"test:coverage": "rm -rf node_modules && rm -rf out && npm i && npm run compile && npm run vscode-extension-tester-setup && c8 npm run all-test"
+		"test:coverage": "rm -rf node_modules && rm -rf out && npm i && npm run compile && c8 npm run all-test"
 	},
 "devDependencies": {
 		"@types/glob": "^7.1.1",
