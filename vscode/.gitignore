@@ -4,4 +4,6 @@ out
 nbproject
 .vscode-test/
 coverage/
-.nyc_output/
+test-resources/
+oracle-java*
+LICENSE

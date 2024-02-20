@@ -23,77 +23,38 @@
 import * as path from 'path';
 import * as Mocha from 'mocha';
 import * as glob from 'glob';
-const NYC = require('nyc');
-import 'ts-node/register';
-import 'source-map-support/register';
-const baseConfig = require("@istanbuljs/nyc-config-typescript");
 
-const tty = require('tty');
-if (!tty.getWindowSize) {
-	tty.getWindowSize = (): number[] => {
-		return [80, 75];
-	};
-}
-
-export async function run(): Promise<void> {
-	const nyc = new NYC({
-		...baseConfig,
-		cwd: path.join(__dirname, '..', '..', '..'),
-		reporter: ['text-summary', 'html'],
-		all: true,
-		silent: false,
-		instrument: true,
-		hookRequire: true,
-		hookRunInContext: true,
-		hookRunInThisContext: true,
-		include: ["out/**/*.js"],
-		exclude: ["out/test/**"],
-	});
-	await nyc.reset();
-	await nyc.wrap();
-
-	Object.keys(require.cache).filter(f => nyc.exclude.shouldInstrument(f)).forEach(m => {
-		console.warn('Module loaded before NYC, invalidating:', m);
-		delete require.cache[m];
-		require(m);
-	});
+export function run(): Promise<void> {
 	// Create the mocha test
 	const mocha = new Mocha({
 		ui: 'tdd',
 		color: true,
 		timeout: 60000
 	});
-
+ 
 	const testsRoot = path.resolve(__dirname, '..');
 
-	const files: Array<string> = await new Promise((resolve, reject) =>
-		glob(
-			'**/**.test.js',
-			{
-				cwd: testsRoot,
-			},
-			(err, files) => {
-				if (err) reject(err)
-				else resolve(files)
+	return new Promise((c, e) => {
+		glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
+			if (err) {
+				return e(err);
 			}
-		)
-	);
-	files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)))
+			// Add files to the test suite
+			files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
-	const failures: number = await new Promise((resolve) => mocha.run(resolve))
-	await nyc.writeCoverageFile()
-
-	console.log(await captureStdout(nyc.report.bind(nyc)));
-
-	if (failures > 0) {
-		throw new Error(`${failures} tests failed.`)
-	}
-}
-
-async function captureStdout(fn: any) {
-	let w = process.stdout.write, buffer = '';
-	process.stdout.write = (s) => { buffer = buffer + s; return true; };
-	await fn();
-	process.stdout.write = w;
-	return buffer;
+			try {
+				// Run the mocha test
+				mocha.run(failures => {
+					if (failures > 0) {
+						e(new Error(`${failures} tests failed.`));
+					} else {
+						c();
+					}
+				});
+			} catch (err) {
+				console.error(err);
+				e(err);
+			}
+		});
+	});
 }

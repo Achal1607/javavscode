@@ -9,5 +9,5 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 coverage/**
-.nyc_output/**
-coverconfig.json
+oracle-java*
+test-resources/**
