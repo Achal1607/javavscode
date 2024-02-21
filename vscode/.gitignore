@@ -7,3 +7,4 @@ coverage/
 test-resources/
 oracle-java*
 LICENSE
+.test-extensions/

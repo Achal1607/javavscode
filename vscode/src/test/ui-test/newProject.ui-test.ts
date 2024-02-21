@@ -11,14 +11,14 @@ describe('New Project Creation tests', function () {
     let driver: WebDriver;
     let workbench: Workbench;
 
-    before(async () => {
+    this.beforeAll(async () => {
         driver = VSBrowser.instance.driver;
         workbench = new Workbench();
         if (fs.existsSync(NEW_PROJECT_CREATION_LOCATION)) {
-            fs.rmSync(ROOT_UI_TEST_DIR, { recursive: true, force: true });
+            fs.rmSync(NEW_PROJECT_CREATION_LOCATION, { recursive: true, force: true });
         }
         fs.mkdirSync(NEW_PROJECT_CREATION_LOCATION, { recursive: true });
-    });
+    }).timeout(30*1000);
 
     it('Create new maven java project', async () => {
         await workbench.openCommandPrompt();

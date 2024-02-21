@@ -6,6 +6,7 @@ import * as path from 'path';
 import { deleteDirContent, getConfigurationFromUserSettings, getDirContent, removeConfigurationFromUserSettings } from './utilities/helperFunctions';
 import { JDK_DOWNLOADER_WEBVIEW_TITLE, JDK_DOWNLOAD_COMMAND, JDK_DOWNLOAD_COMPLETE_MESSAGE, JDK_DOWNLOAD_LOCATION, JDK_HOME_CONFIG, OPEN_JDK_DONWLOAD_BASE_FOLDER, OPEN_JDK_FOLDER_STRUCTURE, ORACLE_JDK_DONWLOAD_BASE_FOLDER, ORACLE_JDK_FOLDER_STRUCTURE, OUTPUT_CHANNEL_NAME, ROOT_UI_TEST_DIR } from './utilities/constants';
 
+let jdkPath:string;
 describe('Oracle JDK Downloader tests', function () {
     let driver: WebDriver;
     let webview: WebView;
@@ -148,6 +149,7 @@ describe('Oracle JDK Downloader tests', function () {
         }
 
         const jdkHomeSetting = await getConfigurationFromUserSettings(JDK_HOME_CONFIG);
+        jdkPath = expectedJdkHomeSetting;
         assert.equal(expectedJdkHomeSetting, jdkHomeSetting, "Settings.json is not updated with correct jdk home path");
     }).timeout(20000);
 
@@ -385,38 +387,38 @@ describe('Manual JDK add tests', function () {
 
         const inputBox = await new InputBox().wait();
         await driver.wait(async () => {
-            await inputBox.setText(JDK_DOWNLOAD_LOCATION);
+            await inputBox.setText(jdkPath);
             const defaultText = await inputBox.getText();
-            return defaultText === JDK_DOWNLOAD_LOCATION;
+            return defaultText === jdkPath;
         })
         const inputBoxText = await inputBox.getText();
         assert.ok(inputBoxText, "Download JDK manually able to select path");
         await inputBox.sendKeys(Key.ENTER);
     }).timeout(20000);
 
-    // it('User settings.json is correctly updated after adding path', async () => {
-    //     const jdkHomeSetting = await getConfigurationFromUserSettings(JDK_HOME_CONFIG);
-    //     assert.equal(JDK_DOWNLOAD_LOCATION, jdkHomeSetting, "Settings.json is not updated with correct jdk home path");
-    // }).timeout(20000);
+    it('User settings.json is correctly updated after adding path', async () => {
+        const jdkHomeSetting = await getConfigurationFromUserSettings(JDK_HOME_CONFIG);
+        assert.equal(jdkPath, jdkHomeSetting, "Settings.json is not updated with correct jdk home path");
+    }).timeout(20000);
 
     // Clean files and configurations created during tests
     after(async () => {
         // unset jdk config from user settings
-        await removeConfigurationFromUserSettings(JDK_HOME_CONFIG);
-        const deleteStatus = await deleteDirContent(JDK_DOWNLOAD_LOCATION);
-        if (!deleteStatus) {
-            console.error("Cleaning files failed")
-        }
-        await workbench.openCommandPrompt();
-        let input: InputBox = await InputBox.create();
-        // check if the command exists
-        await input.setText('>Reload Window');
-        let picks: QuickPickItem[] | null = null;
-        await driver.wait(async () => {
-            picks = await input.getQuickPicks();
-            return picks.length;
-        });
-        assert.ok(picks && (picks as QuickPickItem[]).length > 0, "window cannot be reloaded");
-        await input.selectQuickPick(0);
+        // await removeConfigurationFromUserSettings(JDK_HOME_CONFIG);
+        // const deleteStatus = await deleteDirContent(JDK_DOWNLOAD_LOCATION);
+        // if (!deleteStatus) {
+        //     console.error("Cleaning files failed")
+        // }
+        // await workbench.openCommandPrompt();
+        // let input: InputBox = await InputBox.create();
+        // // check if the command exists
+        // await input.setText('>Reload Window');
+        // let picks: QuickPickItem[] | null = null;
+        // await driver.wait(async () => {
+        //     picks = await input.getQuickPicks();
+        //     return picks.length;
+        // });
+        // assert.ok(picks && (picks as QuickPickItem[]).length > 0, "window cannot be reloaded");
+        // await input.selectQuickPick(0);
     });
 });
