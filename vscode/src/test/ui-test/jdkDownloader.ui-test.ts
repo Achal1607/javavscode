@@ -1,12 +1,12 @@
 import * as assert from 'assert';
-import { Workbench, InputBox, VSBrowser, TextEditor, WebDriver, Key, QuickPickItem, WebView, By, EditorView, WebElement, ModalDialog, Notification, NotificationType, OutputView, BottomBarPanel, ExTester, ExtensionsViewItem, ExtensionsViewSection, SideBarView, ViewControl, ActivityBar, NewScmView } from 'vscode-extension-tester';
+import { Workbench, InputBox, VSBrowser, WebDriver, Key, QuickPickItem, WebView, By, EditorView, WebElement, Notification, NotificationType } from 'vscode-extension-tester';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
-import { deleteDirContent, getConfigurationFromUserSettings, getDirContent, removeConfigurationFromUserSettings } from './utilities/helperFunctions';
-import { JDK_DOWNLOADER_WEBVIEW_TITLE, JDK_DOWNLOAD_COMMAND, JDK_DOWNLOAD_COMPLETE_MESSAGE, JDK_DOWNLOAD_LOCATION, JDK_HOME_CONFIG, OPEN_JDK_DONWLOAD_BASE_FOLDER, OPEN_JDK_FOLDER_STRUCTURE, ORACLE_JDK_DONWLOAD_BASE_FOLDER, ORACLE_JDK_FOLDER_STRUCTURE, OUTPUT_CHANNEL_NAME, ROOT_UI_TEST_DIR } from './utilities/constants';
+import { getConfigurationFromUserSettings, getDirContent } from './utilities/helperFunctions';
+import { JDK_DOWNLOADER_WEBVIEW_TITLE, JDK_DOWNLOAD_COMPLETE_MESSAGE, JDK_DOWNLOAD_LOCATION, JDK_HOME_CONFIG, OPEN_JDK_DONWLOAD_BASE_FOLDER, OPEN_JDK_FOLDER_STRUCTURE, ORACLE_JDK_DONWLOAD_BASE_FOLDER, ORACLE_JDK_FOLDER_STRUCTURE, ROOT_UI_TEST_DIR } from './utilities/constants';
 
-let jdkPath:string;
+let jdkPath: string;
 describe('Oracle JDK Downloader tests', function () {
     let driver: WebDriver;
     let webview: WebView;
@@ -69,10 +69,9 @@ describe('Oracle JDK Downloader tests', function () {
 
         const actualOsVersion = (os.type() === "Linux" ? "linux" : (os.type() === "Darwin" ? "macOS" : "windows"));
         const actualMachineArchVersion = (os.arch() === "arm64" ? "aarch64" : "x64");
-        // const dropdownOptions = await machineArchVersionSelect.findElements(By.css('option'));
 
         assert.equal(defaultOsVersion, actualOsVersion, "Detected wrong OS type");
-        // assert.equal(defaultMachineArchVersion, actualMachineArchVersion,"Detected wrong machine architecture");
+        assert.equal(defaultMachineArchVersion, actualMachineArchVersion, "Detected wrong machine architecture");
 
         await oracleJDKButton.click();
         await webview.switchBack();
@@ -193,21 +192,6 @@ describe('Open JDK Downloader tests', function () {
         });
     }).timeout(20000);
 
-    // it('JDK Downloader contains all the three download options', async () => {
-    //     webview = new WebView();
-    //     await webview.switchToFrame();
-    //     await driver.wait(async () => {
-    //         oracleJDKButton = await webview.findWebElement(By.id("oracleJDK"));
-    //         openJDKButton = await webview.findWebElement(By.id("openJDK"));
-    //         manualDownloadButton = await webview.findWebElement(By.id("addJDKPathManually"));
-    //         return oracleJDKButton || openJDKButton || manualDownloadButton;
-    //     });
-    //     assert.ok(oracleJDKButton, "Download Oracle JDK button absent");
-    //     assert.ok(openJDKButton, "Download Open JDK button absent");
-    //     assert.ok(manualDownloadButton, "Download JDK manually button absent");
-    //     await webview.switchBack();
-    // }).timeout(20000);
-
     it('JDK Downloader contains OpenJDK download option', async () => {
         webview = new WebView();
         await webview.switchToFrame();
@@ -234,10 +218,9 @@ describe('Open JDK Downloader tests', function () {
 
         const actualOsVersion = (os.type() === "Linux" ? "linux" : (os.type() === "Darwin" ? "macOS" : "windows"));
         const actualMachineArchVersion = (os.arch() === "arm64" ? "aarch64" : "x64");
-        // const dropdownOptions = await machineArchVersionSelect.findElements(By.css('option'));
 
         assert.equal(defaultOsVersion, actualOsVersion, "Detected wrong OS type");
-        // assert.equal(defaultMachineArchVersion, actualMachineArchVersion,"Detected wrong machine architecture");
+        assert.equal(defaultMachineArchVersion, actualMachineArchVersion, "Detected wrong machine architecture");
 
         await openJDKButton.click();
         await webview.switchBack();
@@ -257,22 +240,6 @@ describe('Open JDK Downloader tests', function () {
         await webview.switchBack();
 
     }).timeout(20000);
-
-    // it('Extension is activated properly after OracleJDK download', async () => {
-    //     await workbench.executeCommand("jdk.download.jdk");
-    //     const bottomPanel: BottomBarPanel = new BottomBarPanel();
-    //     const outputView: OutputView = await bottomPanel.openOutputView();
-    //     let names: string[] = [];
-    //     await driver.wait(async () => {
-    //         names = await outputView.getChannelNames();
-    //         return names.includes(OUTPUT_CHANNEL_NAME);
-    //     });
-    //     assert(names.includes(OUTPUT_CHANNEL_NAME), "Oracle java extension is not activated");
-    //     await outputView.selectChannel(OUTPUT_CHANNEL_NAME);
-    //     const text = await outputView.getText();
-    //     console.log(text.includes("Language Client: Ready"));
-    //     return await bottomPanel.closePanel();
-    // }).timeout(20000);
 
     it('Download OpenJDK', async () => {
         if (!fs.existsSync(JDK_DOWNLOAD_LOCATION)) {
@@ -401,24 +368,4 @@ describe('Manual JDK add tests', function () {
         assert.equal(jdkPath, jdkHomeSetting, "Settings.json is not updated with correct jdk home path");
     }).timeout(20000);
 
-    // Clean files and configurations created during tests
-    after(async () => {
-        // unset jdk config from user settings
-        // await removeConfigurationFromUserSettings(JDK_HOME_CONFIG);
-        // const deleteStatus = await deleteDirContent(JDK_DOWNLOAD_LOCATION);
-        // if (!deleteStatus) {
-        //     console.error("Cleaning files failed")
-        // }
-        // await workbench.openCommandPrompt();
-        // let input: InputBox = await InputBox.create();
-        // // check if the command exists
-        // await input.setText('>Reload Window');
-        // let picks: QuickPickItem[] | null = null;
-        // await driver.wait(async () => {
-        //     picks = await input.getQuickPicks();
-        //     return picks.length;
-        // });
-        // assert.ok(picks && (picks as QuickPickItem[]).length > 0, "window cannot be reloaded");
-        // await input.selectQuickPick(0);
-    });
 });
