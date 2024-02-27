@@ -138,7 +138,7 @@ describe('Oracle JDK Downloader tests', function () {
             await new Promise(f => setTimeout(f, 1000));
             return false;
         });
-    }).timeout(20 * 1000 * 60);
+    }).timeout(5 * 1000 * 60);
 
     it('User settings.json is correctly updated after OracleJDK Download', async () => {
         if (os.type() === "Darwin") {
@@ -285,7 +285,7 @@ describe('Open JDK Downloader tests', function () {
             }
             return false;
         });
-    }).timeout(20 * 1000 * 60);
+    }).timeout(5 * 1000 * 60);
 
     it('User settings.json is correctly updated after OpenJDK Download', async () => {
         if (os.type() === "Darwin") {
