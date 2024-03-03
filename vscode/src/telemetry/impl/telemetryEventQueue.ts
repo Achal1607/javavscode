@@ -1,12 +1,11 @@
-import { TelemetryEvent } from "../telemetryEvent";
+import { TelemetryEvent } from "../types";
 
 export class TelemetryEventQueue {
-    events: TelemetryEvent[];
+  events: TelemetryEvent[] = [];
 
   constructor() {
-    this.events = [];
   }
-  
+
   public addEvent(e: TelemetryEvent) {
     this.events.push(e);
   }

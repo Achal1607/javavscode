@@ -32,3 +32,13 @@ export const ORACLE_JDK_VERSION_FALLBACK_DOWNLOAD_VERSIONS = {
 export const OPEN_JDK_VERSION_DOWNLOAD_LINKS: { [key: string]: string } = {
   "21.0.2": "https://download.java.net/java/GA/jdk21.0.2/f2283984656d49d69e91c558476027ac/13/GPL/openjdk-21.0.2"
 };
+
+export namespace TelemetryEvents {
+  export const ERROR_TYPE = "ERROR";
+  export const INFO_TYPE = "INFO";
+  export const STARTUP_EVT = "STARTUP_EVT";
+  export const CLOSE_EVT = "CLOSE_EVT";
+  export const CONNECTION_SUCCESS_EVT = "CONNECTION_SUCCESS_EVT";
+  export const SCAN_START_EVT = "SCAN_START_EVT";
+  export const SCAN_END_EVT = "SCAN_END_EVT";
+}
