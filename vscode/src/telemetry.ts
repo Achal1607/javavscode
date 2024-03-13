@@ -5,7 +5,7 @@ import { TelemetryManager } from "./telemetry/telemetryManager";
 export namespace Telemetry {
 
 	let telemetryManager: TelemetryManager;
-	let serverInitializedReceived = false;
+	export let serverInitializedReceived = false;
 	let log: OutputChannel;
 
 	export async function initializeTelemetry(context: ExtensionContext, logger: OutputChannel): Promise<TelemetryManager> {
@@ -32,7 +32,7 @@ export namespace Telemetry {
 			return await telemetryManager.getReporter().closeEvent({ name, type });
 		}
 
-		if (type == TelemetryEvents.ERROR_TYPE) {
+		if (type == TelemetryEvents.ERROR) {
 			return await telemetryManager.getReporter().sendError({ name, data });
 		}
 
@@ -45,7 +45,7 @@ export namespace Telemetry {
 
 	function sendEmptyStartUp() {
 		if (!serverInitializedReceived) {
-			return sendTelemetry(TelemetryEvents.STARTUP_EVT, TelemetryEvents.ERROR_TYPE);
+			return sendTelemetry(TelemetryEvents.STARTUP_EVT, TelemetryEvents.ERROR);
 		}
 	}
 }

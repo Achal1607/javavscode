@@ -22,7 +22,7 @@ export interface Platform {
     name: string,
     archType?: string,
     distribution?: string,
-    version?: string,
+    version?: string
 }
 
 export interface Location {

@@ -1111,29 +1111,34 @@ function doActivateWithJDK(specifiedJDK: string | null, context: ExtensionContex
                 }
             });
             handleLog(log, 'Language Client: Ready');
-            Telemetry.sendTelemetry(TelemetryEvents.STARTUP_EVT, TelemetryEvents.INFO_TYPE);
             setClient[0](c);
             commands.executeCommand('setContext', 'nbJdkReady', true);
+
+            telemetryService.then(() => {
+                Telemetry.serverInitializedReceived = true;
+                Telemetry.sendTelemetry(TelemetryEvents.STARTUP_EVT, TelemetryEvents.INFO);
+            });
+
             c.onTelemetry(async (e) => {
-                if ([TelemetryEvents.SCAN_START_EVT, TelemetryEvents.SCAN_END_EVT].includes(e?.name || "")) {
+                await telemetryService;
+                if ([TelemetryEvents.SCAN_START_EVT, TelemetryEvents.SCAN_END_EVT].includes(e.name)) {
                     const ls = listeners.get(e);
                     if (ls) {
                         for (const listener of ls) {
                             commands.executeCommand(listener);
                         }
                     }
-                    Telemetry.sendTelemetry(e?.name, TelemetryEvents.INFO_TYPE, e?.properties);
                 }
-                else if (e?.name === TelemetryEvents.CONNECTION_SUCCESS_EVT) {
-                } else {
-                    Telemetry.sendTelemetry(e?.name || "UNKOWN", TelemetryEvents.INFO_TYPE);
+                else {
+                    Telemetry.sendTelemetry(e.name, e.type, e?.properties);
                 }
             });
+
             // create project explorer:
             //c.findTreeViewService().createView('foundProjects', 'Projects', { canSelectMany : false });
             createProjectView(context, c);
         }).catch((err)=>{
-            Telemetry.sendTelemetry(TelemetryEvents.STARTUP_EVT, TelemetryEvents.ERROR_TYPE);
+            Telemetry.sendTelemetry(TelemetryEvents.STARTUP_EVT, TelemetryEvents.ERROR, err?.message);
             setClient[1];
         });
     }).catch((reason) => {
@@ -1303,6 +1308,11 @@ function stopClient(clientPromise: Promise<LanguageClient>): Thenable<void> {
     if (testAdapter) {
         testAdapter.dispose();
         testAdapter = undefined;
+    }
+    if(Telemetry.serverInitializedReceived){
+        telemetryService.then(()=>{
+            Telemetry.sendTelemetry(TelemetryEvents.CLOSE_EVT, TelemetryEvents.INFO);
+        });
     }
     return clientPromise && !(clientPromise instanceof InitialPromise) ? clientPromise.then(c => c.stop()) : Promise.resolve();
 }

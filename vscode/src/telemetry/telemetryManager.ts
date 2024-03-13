@@ -6,6 +6,7 @@ import { readPackageJson } from "./utils/utils";
 import { getStaticInfo } from "./impl/staticInfoImpl";
 import { TelemetryServiceImpl } from "./impl/telemetryServiceImpl";
 import { StaticInfo, TelemetryService } from "./types";
+import { ElasticDatabase } from "./database/analytics";
 
 export class TelemetryManager {
     private extensionContext: ExtensionContext;
@@ -14,6 +15,7 @@ export class TelemetryManager {
     private environment?: StaticInfo;
     private reporter?: TelemetryService;
     private packageJson?: any;
+    private client?: ElasticDatabase;
 
     constructor(extensionContext: ExtensionContext) {
         this.extensionContext = extensionContext;
@@ -41,8 +43,12 @@ export class TelemetryManager {
         if (!this.environment) {
             await this.setStaticInfo();
         }
+        if (!this.client) {
+            this.client = new ElasticDatabase();
+        }
+
         const queue = new TelemetryEventQueue();
-        this.reporter = new TelemetryServiceImpl(queue, this.anonymousId!, this.settings, this.environment!);
+        this.reporter = new TelemetryServiceImpl(this.client, queue, this.anonymousId!, this.settings, this.environment!);
 
         return this;
     }

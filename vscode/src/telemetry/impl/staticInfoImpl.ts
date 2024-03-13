@@ -30,7 +30,7 @@ function getArchType(): string {
 }
 
 function getPlatformVersion(): string {
-    return os.release();
+    return os.version();
 }
 
 function getTimeZone(): string {
@@ -75,7 +75,7 @@ export async function getStaticInfo(context: ExtensionContext, packageJson: any)
             name: vscodeEnv.appName,
             version: version,
             host: vscodeEnv.appHost,
-            locale: vscodeEnv.language
+            locale: vscodeEnv.language,
         },
         platform: {
             name: PLATFORM,

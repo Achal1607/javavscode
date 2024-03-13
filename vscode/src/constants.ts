@@ -34,8 +34,8 @@ export const OPEN_JDK_VERSION_DOWNLOAD_LINKS: { [key: string]: string } = {
 };
 
 export namespace TelemetryEvents {
-  export const ERROR_TYPE = "ERROR";
-  export const INFO_TYPE = "INFO";
+  export const ERROR = "ERROR";
+  export const INFO = "INFO";
   export const STARTUP_EVT = "STARTUP_EVT";
   export const CLOSE_EVT = "CLOSE_EVT";
   export const CONNECTION_SUCCESS_EVT = "CONNECTION_SUCCESS_EVT";

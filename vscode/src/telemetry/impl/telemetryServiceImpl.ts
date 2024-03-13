@@ -1,16 +1,16 @@
-import { ERROR_TYPE_TELEMETRY, OUTPUT_TELEMETRY_CHANNEL_NAME } from "../utils/constants";
+import { ERROR_TYPE_TELEMETRY } from "../utils/constants";
 import { getCurrentUTCDateInSeconds } from "../utils/utils";
 import { TelemetryEventQueue } from "./telemetryEventQueue";
-import { OutputChannel, window } from "vscode";
 import { TelemetryPrefs } from "./telemetryPrefs";
 import { AnonymousIdManager } from "./AnonymousIdManager";
 import { StaticInfo, TelemetryService, TelemetryEvent } from "../types";
+import { ElasticDatabase } from "../database/analytics";
 
 export class TelemetryServiceImpl implements TelemetryService {
     private activationTime: number = getCurrentUTCDateInSeconds();
-    private logger: OutputChannel = window.createOutputChannel(OUTPUT_TELEMETRY_CHANNEL_NAME);
 
     constructor(
+        private analyticsClient: ElasticDatabase,
         private queue: TelemetryEventQueue,
         private anonymousId: AnonymousIdManager,
         private settings: TelemetryPrefs,
@@ -32,24 +32,28 @@ export class TelemetryServiceImpl implements TelemetryService {
         }
     }
 
-    public async sendError({name , data}: {name: string, data?: any}): Promise<void> {
+    public async sendError({ name, data }: { name: string, data?: any }): Promise<void> {
         return await this.send({ name, data, type: ERROR_TYPE_TELEMETRY });
     }
 
     private async sendEvent(event: TelemetryEvent): Promise<void> {
         try {
             console.log(event);
-            this.logger.appendLine("EVENT START");
-            this.logger.appendLine(event.machineId || "");
-            this.logger.appendLine(event.sessionId || "");
-            this.logger.appendLine(event.type);
-            this.logger.appendLine(event.data);
-            this.logger.appendLine("EVENT END");
+            const doc = await this.analyticsClient.createDocument({
+                name: event.name,
+                type: event.type,
+                machineId: event.machineId,
+                sessionId: event.sessionId,
+                data: event?.data || {}
+            });
+            console.log(doc);
         } catch (err) {
+            console.error(err);
         }
     }
 
     public async startEvent(event: TelemetryEvent): Promise<void> {
+        await this.analyticsClient.createIndex();
         return this.send({ ...event, data: { ...event?.data, environment: this.staticInfo } });
     }
 
