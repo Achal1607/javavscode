@@ -17,7 +17,7 @@ export class ElasticDatabase {
                     apiKey: "TDRGU0U0NEIxRnowOFpFaFJLRnk6R3FZRXFsZVRRdm1YNWI4eXpXYTQxdw=="
                 },
                 tls: {
-                    ca: fs.readFileSync('/tmp/http_ca.crt'),
+                    ca: fs.readFileSync('/Users/atalati/http_ca.crt'),
                     rejectUnauthorized: false
                 }
             });

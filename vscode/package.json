@@ -748,6 +748,8 @@
 		"axios": "^1.6.0",
 		"getos": "^3.2.1",
 		"jsonc-parser": "3.2.0",
+		"oci-common": "^2.82.1",
+		"oci-loggingingestion": "^2.82.1",
 		"vscode-languageclient": "^8.1.0"
 	}
 }

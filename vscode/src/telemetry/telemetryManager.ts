@@ -6,7 +6,7 @@ import { readPackageJson } from "./utils/utils";
 import { getStaticInfo } from "./impl/staticInfoImpl";
 import { TelemetryServiceImpl } from "./impl/telemetryServiceImpl";
 import { StaticInfo, TelemetryService } from "./types";
-import { ElasticDatabase } from "./database/analytics";
+import { ElasticDatabase } from "./database/localAnalytics";
 
 export class TelemetryManager {
     private extensionContext: ExtensionContext;

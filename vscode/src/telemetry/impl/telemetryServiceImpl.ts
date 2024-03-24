@@ -4,7 +4,8 @@ import { TelemetryEventQueue } from "./telemetryEventQueue";
 import { TelemetryPrefs } from "./telemetryPrefs";
 import { AnonymousIdManager } from "./AnonymousIdManager";
 import { StaticInfo, TelemetryService, TelemetryEvent } from "../types";
-import { ElasticDatabase } from "../database/analytics";
+import { ElasticDatabase } from "../database/localAnalytics";
+import { postTelemetry } from "../database/ociMetrics";
 
 export class TelemetryServiceImpl implements TelemetryService {
     private activationTime: number = getCurrentUTCDateInSeconds();
@@ -39,14 +40,15 @@ export class TelemetryServiceImpl implements TelemetryService {
     private async sendEvent(event: TelemetryEvent): Promise<void> {
         try {
             console.log(event);
-            const doc = await this.analyticsClient.createDocument({
-                name: event.name,
-                type: event.type,
-                machineId: event.machineId,
-                sessionId: event.sessionId,
-                data: event?.data || {}
-            });
-            console.log(doc);
+            // const doc = await postTelemetry(event); 
+            // const doc = await this.analyticsClient.createDocument({
+            //     name: event.name,
+            //     type: event.type,
+            //     machineId: event.machineId,
+            //     sessionId: event.sessionId,
+            //     data: event?.data || {}
+            // });
+            // console.log(doc);
         } catch (err) {
             console.error(err);
         }
