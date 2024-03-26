@@ -1,4 +1,4 @@
-import { ExtensionContext, OutputChannel, workspace, WorkspaceConfiguration } from "vscode";
+import { ExtensionContext, OutputChannel } from "vscode";
 import { TelemetryEvents } from "./constants";
 import { TelemetryManager } from "./telemetry/telemetryManager";
 
@@ -30,10 +30,6 @@ export namespace Telemetry {
 
 		if (name == TelemetryEvents.CLOSE_EVT) {
 			return await telemetryManager.getReporter().closeEvent({ name, type });
-		}
-
-		if (type == TelemetryEvents.ERROR) {
-			return await telemetryManager.getReporter().sendError({ name, data });
 		}
 
 		return await telemetryManager.getReporter().send({

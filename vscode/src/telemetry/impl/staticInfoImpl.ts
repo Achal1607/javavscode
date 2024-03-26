@@ -1,17 +1,19 @@
 import * as os from 'os';
 import { env as vscodeEnv, version, ExtensionContext } from 'vscode';
 import { promisify } from 'util';
-import * as getos from 'getos';
+import getos from 'getos';
 import { LinuxOs } from 'getos';
 import { StaticInfo } from '../types';
+import { getCountry } from '../utils/utils';
 
 export const PLATFORM = getPlatform();
 export const ARCH_TYPE = getArchType();
 export const PLATFORM_VERSION = getPlatformVersion();
 export const DISTRO = getDistribution();
 export const TIMEZONE = getTimeZone();
+export const COUNTRY = getCountry(TIMEZONE);
 export const LOCALE = getLocale();
-export const USERNAME = getUsername();
+// export const USERNAME = getUsername();
 
 
 function getPlatform(): string {
@@ -30,7 +32,7 @@ function getArchType(): string {
 }
 
 function getPlatformVersion(): string {
-    return os.version();
+    return os.release();
 }
 
 function getTimeZone(): string {
@@ -49,20 +51,20 @@ async function getDistribution(): Promise<string | undefined> {
     return undefined;
 }
 
-function getUsername(): string | undefined {
-    const env = process.env || {};
-    let username = (
-        env.SUDO_USER ||
-        env.LOGNAME ||
-        env.USER ||
-        env.LNAME ||
-        env.USERNAME
-    );
-    if (!username) {
-        username = os.userInfo()?.username;
-    }
-    return username;
-}
+// function getUsername(): string | undefined {
+//     const env = process.env || {};
+//     let username = (
+//         env.SUDO_USER ||
+//         env.LOGNAME ||
+//         env.USER ||
+//         env.LNAME ||
+//         env.USERNAME
+//     );
+//     if (!username) {
+//         username = os.userInfo()?.username;
+//     }
+//     return username;
+// }
 
 export async function getStaticInfo(context: ExtensionContext, packageJson: any): Promise<StaticInfo> {
     return {
@@ -86,8 +88,8 @@ export async function getStaticInfo(context: ExtensionContext, packageJson: any)
         location: {
             timezone: TIMEZONE,
             locale: LOCALE,
-            country: ''
+            country: COUNTRY
         },
-        username: USERNAME
+        // username: USERNAME
     };
 }

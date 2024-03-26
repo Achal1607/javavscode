@@ -1,18 +1,12 @@
-import { workspace } from "vscode";
+import { workspace, env } from "vscode";
 import { TELEMETRY_COMMAND } from "../utils/constants";
 
 export class TelemetryPrefs {
-  public isTelemetryEnabled: boolean = this.checkTelemetryStatus();
-  public telemetryLevel: "off" | "all" | "error" | "crash" | undefined = this.getTelemetryLevel();
-
-  constructor() {
-  }
-
-  private checkTelemetryStatus(): boolean {
+  public checkTelemetryStatus(): boolean {
     return this.getTelemetryLevel() !== 'off' && this.getTelemetryConfiguration().get<boolean>('enabled', false);
   }
 
-  private getTelemetryLevel(): "off" | "all" | "error" | "crash" | undefined {
+  public getTelemetryLevel(): "off" | "all" | "error" | "crash" | undefined {
     if (workspace.getConfiguration().get("telemetry.enableTelemetry") == false
       || workspace.getConfiguration().get("telemetry.enableCrashReporter") == false
     ) {
@@ -21,8 +15,8 @@ export class TelemetryPrefs {
     return workspace.getConfiguration().get("telemetry.telemetryLevel", "off");
   }
 
-  public isTelemetryConfigured(): boolean {
-    const config = workspace.getConfiguration().inspect(`${TELEMETRY_COMMAND}.enabled`);
+  private configPref(configCommand: string): boolean {
+    const config = workspace.getConfiguration().inspect(configCommand);
     return (
       config?.workspaceFolderValue !== undefined ||
       config?.workspaceFolderLanguageValue !== undefined ||
@@ -32,13 +26,23 @@ export class TelemetryPrefs {
       config?.globalLanguageValue !== undefined
     );
   }
+  
+  public isExtTelemetryConfigured(): boolean {
+    return this.configPref(`${TELEMETRY_COMMAND}.enabled`); 
+  }
 
   public async updateTelemetryEnabledConfig(value: boolean): Promise<void> {
     return await this.getTelemetryConfiguration().update('enabled', value, true);
   }
 
+  public didUserDisableVscodeTelemetry(): boolean {
+    if (env.isTelemetryEnabled) {
+      return false;
+    }
+    return this.configPref("telemetry.telemetryLevel") && workspace.getConfiguration().get("telemetry.telemetryLevel") === "off";
+  }
+
   private getTelemetryConfiguration() {
     return workspace.getConfiguration(TELEMETRY_COMMAND);
   }
-
 }

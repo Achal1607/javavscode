@@ -43,8 +43,7 @@ import {
     ErrorHandlerResult,
     CloseHandlerResult,
     SymbolInformation,
-    TextDocumentFilter,
-    TelemetryEventNotification
+    TextDocumentFilter
 } from 'vscode-languageclient';
 
 import * as net from 'net';
@@ -1215,7 +1214,7 @@ function doActivateWithJDK(specifiedJDK: string | null, context: ExtensionContex
                     }
                 }
                 else {
-                    Telemetry.sendTelemetry(e.name, e.type, e?.properties);
+                    Telemetry.sendTelemetry(e.name, (e.type as string).toUpperCase(), e?.properties);
                 }
             });
 

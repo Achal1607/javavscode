@@ -44,8 +44,6 @@ export interface TelemetryService {
 
     send(event: TelemetryEvent): Promise<void>;
 
-    sendError({ name, data }: { name: string, data?: any }): Promise<void>;
-
     closeEvent(event: TelemetryEvent): Promise<void>;
 
     flushQueue(): Promise<void>;

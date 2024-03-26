@@ -22,23 +22,18 @@ export class TelemetryServiceImpl implements TelemetryService {
         event.machineId = this.anonymousId.getMachineId();
         event.sessionId = this.anonymousId.getSessionId();
 
-        if (this.settings.isTelemetryEnabled) {
-            if (["error", "crash"].includes(this.settings.telemetryLevel || "off") && event.type != ERROR_TYPE_TELEMETRY) {
-                this.queue.addEvent(event);
-            } else {
-                this.sendEvent(event)
-            }
-        } else {
+        if (this.settings.checkTelemetryStatus()) {
+            this.sendEvent(event);
+        } else if(!this.settings.isExtTelemetryConfigured()){
             this.queue.addEvent(event);
         }
     }
 
-    public async sendError({ name, data }: { name: string, data?: any }): Promise<void> {
-        return await this.send({ name, data, type: ERROR_TYPE_TELEMETRY });
-    }
-
     private async sendEvent(event: TelemetryEvent): Promise<void> {
         try {
+            if (["error", "crash"].includes(this.settings.getTelemetryLevel() || "off") && event.type != ERROR_TYPE_TELEMETRY) {
+                return;
+            }
             console.log(event);
             // const doc = await postTelemetry(event); 
             // const doc = await this.analyticsClient.createDocument({
@@ -72,8 +67,9 @@ export class TelemetryServiceImpl implements TelemetryService {
         while (this.queue.events.length) {
             const event = this.queue.events.shift();
             if (event) {
-                await this.sendEvent(event);
+                await this.send(event);
             }
         }
+        this.dispose();
     }
 }

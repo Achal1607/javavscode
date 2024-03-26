@@ -13,32 +13,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 */
-
-export const JDK_RELEASES_TRACK_URL = `https://www.java.com/releases/releases.json`;
-
-export const ORACLE_JDK_BASE_DOWNLOAD_URL = `https://download.oracle.com/java/`;
-
-export const ORACLE_JDK_VERSION_FALLBACK_DOWNLOAD_VERSIONS = {
-  latestVersion :{
-    version: '21.0.2',
-    family: '21'
-  },
-  latestLtsVersion :{
-    version: '17.0.10',
-    family: '17'
-  },
-};
-
-export const OPEN_JDK_VERSION_DOWNLOAD_LINKS: { [key: string]: string } = {
-  "21.0.2": "https://download.java.net/java/GA/jdk21.0.2/f2283984656d49d69e91c558476027ac/13/GPL/openjdk-21.0.2"
-};
-
 export namespace TelemetryEvents {
   export const ERROR = "ERROR";
   export const INFO = "INFO";
   export const STARTUP_EVT = "STARTUP_EVT";
   export const CLOSE_EVT = "CLOSE_EVT";
-  export const CONNECTION_SUCCESS_EVT = "CONNECTION_SUCCESS_EVT";
   export const SCAN_START_EVT = "SCAN_START_EVT";
   export const SCAN_END_EVT = "SCAN_END_EVT";
 }
