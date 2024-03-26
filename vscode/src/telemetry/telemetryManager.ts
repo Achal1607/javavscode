@@ -6,7 +6,6 @@ import { readPackageJson } from "./utils/utils";
 import { getStaticInfo } from "./impl/staticInfoImpl";
 import { TelemetryServiceImpl } from "./impl/telemetryServiceImpl";
 import { StaticInfo, TelemetryService } from "./types";
-import { ElasticDatabase } from "./database/localAnalytics";
 import { TELEMETRY_COMMAND } from "./utils/constants";
 
 export class TelemetryManager {
@@ -16,7 +15,6 @@ export class TelemetryManager {
     private environment?: StaticInfo;
     private reporter?: TelemetryService;
     private packageJson?: any;
-    private client?: ElasticDatabase;
 
     constructor(extensionContext: ExtensionContext) {
         this.extensionContext = extensionContext;
@@ -39,12 +37,9 @@ export class TelemetryManager {
         if (!this.environment) {
             await this.setStaticInfo();
         }
-        if (!this.client) {
-            this.client = new ElasticDatabase();
-        }
 
         const queue = new TelemetryEventQueue();
-        this.reporter = new TelemetryServiceImpl(this.client, queue, this.anonymousId!, this.settings, this.environment!);
+        this.reporter = new TelemetryServiceImpl(queue, this.anonymousId!, this.settings, this.environment!);
         this.extensionContext.subscriptions.push(this.onDidChangeTelemetryEnabled());
         this.openTelemetryDialog();
 
@@ -70,7 +65,7 @@ export class TelemetryManager {
         return workspace.onDidChangeConfiguration(
             (e: ConfigurationChangeEvent) => {
               if (e.affectsConfiguration(TELEMETRY_COMMAND) || e.affectsConfiguration("telemetry")) {
-                this.reporter.flushQueue();
+                this.reporter?.flushQueue();
               }
             }
           );

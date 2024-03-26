@@ -4,14 +4,12 @@ import { TelemetryEventQueue } from "./telemetryEventQueue";
 import { TelemetryPrefs } from "./telemetryPrefs";
 import { AnonymousIdManager } from "./AnonymousIdManager";
 import { StaticInfo, TelemetryService, TelemetryEvent } from "../types";
-import { ElasticDatabase } from "../database/localAnalytics";
-import { postTelemetry } from "../database/ociMetrics";
+import { postTelemetry } from "./ociMetrics";
 
 export class TelemetryServiceImpl implements TelemetryService {
     private activationTime: number = getCurrentUTCDateInSeconds();
 
     constructor(
-        private analyticsClient: ElasticDatabase,
         private queue: TelemetryEventQueue,
         private anonymousId: AnonymousIdManager,
         private settings: TelemetryPrefs,
@@ -50,7 +48,6 @@ export class TelemetryServiceImpl implements TelemetryService {
     }
 
     public async startEvent(event: TelemetryEvent): Promise<void> {
-        await this.analyticsClient.createIndex();
         return this.send({ ...event, data: { ...event?.data, environment: this.staticInfo } });
     }
 
