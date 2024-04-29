@@ -4,7 +4,7 @@
 	"description": "Oracle Java Platform Extension for Visual Studio Code",
 	"author": "Oracle",
 	"license": "Apache 2.0",
-	"version": "0.1.0",
+	"version": "22.0.0",
 	"preview": false,
 	"repository": {
 		"type": "git",
@@ -754,6 +754,7 @@
 		"@types/glob": "^7.1.1",
 		"@types/mocha": "^9.0.0",
 		"@types/node": "^18.19.1",
+		"@types/node-fetch": "^2.6.11",
 		"@types/ps-node": "^0.1.0",
 		"@types/vscode": "^1.76.0",
 		"@types/vscode-webview": "^1.57.1",

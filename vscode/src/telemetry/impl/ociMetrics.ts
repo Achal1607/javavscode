@@ -6,7 +6,6 @@ import { randomUUID } from "crypto";
 const provider: common.SessionAuthDetailProvider = new common.SessionAuthDetailProvider();
 
 export const postTelemetry = async (event: TelemetryEvent) => {
-    try {
         // Create a service client
         const client = new loggingingestion.LoggingClient({ authenticationDetailsProvider: provider });
  
@@ -22,7 +21,7 @@ export const postTelemetry = async (event: TelemetryEvent) => {
                         }
                     ],
                     source: "vscode",
-                    type: event.type,
+                    type: `com.oraclecloud.logging.custom.vscode.${event.name}`,
                     defaultlogentrytime: new Date()
                 }
             ]
@@ -37,7 +36,4 @@ export const postTelemetry = async (event: TelemetryEvent) => {
         // Send request to the Client.
         const putLogsResponse = await client.putLogs(putLogsRequest);
         return putLogsResponse;
-    } catch (error) {
-        console.log("putLogs Failed with error  " + error);
-    }
 }

@@ -340,7 +340,7 @@ export function activate(context: ExtensionContext): VSNetBeansAPI {
         clientReject = reject;
     });
 
-    telemetryService =  Telemetry.initializeTelemetry(context, log);
+    telemetryService =  Telemetry.initializeTelemetry(context);
     
     // find acceptable JDK and launch the Java part
     findJDK((specifiedJDK) => {

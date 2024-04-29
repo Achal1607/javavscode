@@ -1,4 +1,4 @@
-import { ExtensionContext, OutputChannel } from "vscode";
+import { ExtensionContext } from "vscode";
 import { TelemetryEvents } from "./constants";
 import { TelemetryManager } from "./telemetry/telemetryManager";
 
@@ -6,10 +6,9 @@ export namespace Telemetry {
 
 	let telemetryManager: TelemetryManager;
 	export let serverInitializedReceived = false;
-	let log: OutputChannel;
 
-	export async function initializeTelemetry(context: ExtensionContext, logger: OutputChannel): Promise<TelemetryManager> {
-		log = logger;
+	export async function initializeTelemetry(context: ExtensionContext): Promise<TelemetryManager> {
+		
 		if (!!telemetryManager) {
 			throw new Error("Telemetry is already initialized");
 		}
@@ -20,9 +19,6 @@ export namespace Telemetry {
 	}
 
 	export async function sendTelemetry(name: string, type: string, data: any = {}): Promise<void> {
-		if (!telemetryManager) {
-			log.appendLine("Telemetry is not yet initialized");
-		}
 		if (name == TelemetryEvents.STARTUP_EVT) {
 			serverInitializedReceived = true;
 			return await telemetryManager.getReporter().startEvent({ name, type });

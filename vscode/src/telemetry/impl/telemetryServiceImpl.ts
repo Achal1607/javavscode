@@ -5,6 +5,7 @@ import { TelemetryPrefs } from "./telemetryPrefs";
 import { AnonymousIdManager } from "./AnonymousIdManager";
 import { StaticInfo, TelemetryService, TelemetryEvent } from "../types";
 import { postTelemetry } from "./ociMetrics";
+import { OutputChannel } from 'vscode';
 
 export class TelemetryServiceImpl implements TelemetryService {
     private activationTime: number = getCurrentUTCDateInSeconds();
@@ -13,12 +14,16 @@ export class TelemetryServiceImpl implements TelemetryService {
         private queue: TelemetryEventQueue,
         private anonymousId: AnonymousIdManager,
         private settings: TelemetryPrefs,
-        private staticInfo: StaticInfo) {
+        private staticInfo: StaticInfo,
+        private logger: OutputChannel) {
     }
 
     public async send(event: TelemetryEvent): Promise<void> {
-        event.machineId = this.anonymousId.getMachineId();
-        event.sessionId = this.anonymousId.getSessionId();
+        if(!("data" in event)){
+            event["data"] = {};
+        }
+        event.data.machineId = this.anonymousId.getMachineId();
+        event.data.sessionId = this.anonymousId.getSessionId();
 
         if (this.settings.checkTelemetryStatus()) {
             this.sendEvent(event);
@@ -32,18 +37,13 @@ export class TelemetryServiceImpl implements TelemetryService {
             if (["error", "crash"].includes(this.settings.getTelemetryLevel() || "off") && event.type != ERROR_TYPE_TELEMETRY) {
                 return;
             }
-            console.log(event);
-            // const doc = await postTelemetry(event); 
-            // const doc = await this.analyticsClient.createDocument({
-            //     name: event.name,
-            //     type: event.type,
-            //     machineId: event.machineId,
-            //     sessionId: event.sessionId,
-            //     data: event?.data || {}
-            // });
-            // console.log(doc);
-        } catch (err) {
-            console.error(err);
+            this.logger.appendLine(JSON.stringify(event, null, 4));
+            const doc = await postTelemetry(event); 
+            this.logger.appendLine("Telemetry Posted Successfully!!");
+            this.logger.appendLine(doc.opcRequestId)
+        } catch (err: any) {
+            this.logger.appendLine(`Error Occurred!! while sending telemetry: ${event?.name}: `);
+            this.logger.appendLine(err?.message || "No error message");
         }
     }
 

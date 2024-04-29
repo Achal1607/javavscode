@@ -1,4 +1,4 @@
-import { ConfigurationChangeEvent, ExtensionContext, window, workspace } from "vscode";
+import { ConfigurationChangeEvent, ExtensionContext, OutputChannel, window, workspace } from "vscode";
 import { AnonymousIdManager } from "./impl/AnonymousIdManager";
 import { TelemetryPrefs } from "./impl/telemetryPrefs";
 import { TelemetryEventQueue } from "./impl/telemetryEventQueue";
@@ -15,9 +15,11 @@ export class TelemetryManager {
     private environment?: StaticInfo;
     private reporter?: TelemetryService;
     private packageJson?: any;
+    public logger: OutputChannel;
 
     constructor(extensionContext: ExtensionContext) {
         this.extensionContext = extensionContext;
+        this.logger = window.createOutputChannel("Oracle Java Telemetry");
     }
 
     public async setStaticInfo(): Promise<TelemetryManager> {
@@ -39,7 +41,7 @@ export class TelemetryManager {
         }
 
         const queue = new TelemetryEventQueue();
-        this.reporter = new TelemetryServiceImpl(queue, this.anonymousId!, this.settings, this.environment!);
+        this.reporter = new TelemetryServiceImpl(queue, this.anonymousId!, this.settings, this.environment!, this.logger);
         this.extensionContext.subscriptions.push(this.onDidChangeTelemetryEnabled());
         this.openTelemetryDialog();
 
@@ -55,20 +57,26 @@ export class TelemetryManager {
 
     private openTelemetryDialog = async () => {
         if (!this.settings.isExtTelemetryConfigured() && !this.settings.didUserDisableVscodeTelemetry()) {
+            this.logger.appendLine("Telemetry not enabled yet!!");
             const enable = await window.showInformationMessage(`Do you want to enable telemetry for ${this?.packageJson?.name} extension?`, "Yes", "No");
-            if(enable == undefined) return;
+            if (enable == undefined) {
+                return;
+            }
             await this.settings.updateTelemetryEnabledConfig(enable === "Yes");
+            if (enable === "Yes") {
+                this.logger.appendLine("Telemetry is now enabled!!");
+            }
         }
     }
 
     private onDidChangeTelemetryEnabled = () => {
         return workspace.onDidChangeConfiguration(
             (e: ConfigurationChangeEvent) => {
-              if (e.affectsConfiguration(TELEMETRY_COMMAND) || e.affectsConfiguration("telemetry")) {
-                this.reporter?.flushQueue();
-              }
+                if (e.affectsConfiguration(TELEMETRY_COMMAND) || e.affectsConfiguration("telemetry")) {
+                    this.reporter?.flushQueue();
+                }
             }
-          );
+        );
     }
 
 };
