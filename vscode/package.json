@@ -1,7 +1,7 @@
 {
 	"name": "oracle-java",
-	"displayName": "Java Platform Support",
-	"description": "Oracle Java Platform Extension for Visual Studio Code",
+	"displayName": "Java",
+	"description": "Java Platform Extension for Visual Studio Code",
 	"author": "Oracle",
 	"license": "Apache 2.0",
 	"version": "22.0.0",
@@ -425,10 +425,6 @@
 				"title": "Clean Project"
 			},
 			{
-				"command": "jdk.local.db.set.preferred.connection",
-				"title": "Set as Default Connection"
-			},
-			{
 				"command": "jdk.workspace.configureRunSettings",
 				"title": "Edit",
 				"icon": "$(edit)"
@@ -766,7 +762,7 @@
 		"vscode-test": "^1.3.0"
 	},
 	"dependencies": {
-		"@vscode/debugadapter": "1.55.1",
+		"@vscode/debugadapter": "^1.65.0",
 		"@vscode/webview-ui-toolkit": "^1.2.2",
 		"axios": "^1.6.8",
 		"countries-and-timezones": "^3.6.0",

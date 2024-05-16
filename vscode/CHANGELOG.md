@@ -24,6 +24,30 @@
 -->
 
 <!-- This file has been modified for Oracle Java SE extension -->
+## Version 22.0.0 (April 25th, 2024)
+### What's Changed
+
+### Enhancements
+* [JAVAVSCODE-9] Disable hints according to user preference https://github.com/apache/netbeans/pull/6760
+* [JAVAVSCODE-110] Added option to delete workspace cache with respect to oracle java extension https://github.com/oracle/javavscode/pull/124
+* [JAVAVSCODE-123] Update to NetBeans 21 and JDK 22 features support https://github.com/oracle/javavscode/pull/128
+* [JAVAVSCODE-131] Added JDK 22 GA download option in JDK downloader https://github.com/oracle/javavscode/pull/133
+* [JAVAVSCODE-146] Rename "Java Platform Support" as "Java" https://github.com/oracle/javavscode/pull/147
+* Option to work with JDK 23 early access by disabling javac bundled with Netbeans https://github.com/oracle/javavscode/pull/130
+* Bump up axios 1.6.0 to 1.6.8 https://github.com/oracle/javavscode/pull/127
+* Bump up @vscode/debugadapter from 1.55.1 to 1.65.0 https://github.com/oracle/javavscode/pull/135
+
+### Bugs
+* [JAVAVSCODE-29] vscode reports a need to upgrade Gradle to an earlier version for JDK-21 https://github.com/apache/netbeans/pull/6807
+* [JAVAVSCODE-30] Fixed refactoring of pom.xml as well on renaming class name https://github.com/oracle/javavscode/pull/120
+* [JAVAVSCODE-95] Fixed false error thrown if parent pom version uses variable https://github.com/oracle/javavscode/pull/125
+
+### Other Changes
+* [JAVAVSCODE-137] Updated Third party licenses related to Node JS third party dependencies https://github.com/oracle/javavscode/pull/138
+* Removing (unused) DB support from extension https://github.com/oracle/javavscode/pull/112
+
+**Full Changelog**: https://github.com/oracle/javavscode/compare/v1.0.1...v22.0.0
+
 ## Version 1.0.1 (February 22nd, 2024)
 ### What’s Changed
 
@@ -67,7 +91,7 @@
 * Upgrade commons-codec from 1.15 to 1.16.0 https://github.com/oracle/javavscode/pull/107
 * Upgrade of failureaccess (component of Guava) https://github.com/oracle/javavscode/pull/109
 
-**Full Changelog**: https://github.com/oracle/javavscode/compare/v1.0.0...v1.0.0.1
+**Full Changelog**: https://github.com/oracle/javavscode/compare/v1.0.0...v1.0.1
 
 ## Version 1.0.0 (October 18th, 2023)
 * Initial release

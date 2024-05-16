@@ -22,13 +22,13 @@
 
 <!-- This file has been modified for Oracle Java Platform extension -->
 
-# Oracle Java Platform Extension for Visual Studio Code
+# Java Platform Extension for Visual Studio Code
 [![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/Oracle.oracle-java?style=for-the-badge&label=VS%20Marketplace&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=Oracle.oracle-java)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/Oracle.oracle-java?style=for-the-badge)](https://marketplace.visualstudio.com/items?itemName=Oracle.oracle-java)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/oracle/javavscode/main.yml?branch=main&style=for-the-badge&logo=github)](https://github.com/oracle/javavscode/actions?query=workflow:Java%20Platform%20Support%20for%20Visual%20Studio%20Code)
 [![License](https://img.shields.io/github/license/oracle/javavscode?style=for-the-badge&logo=apache)](https://github.com/oracle/javavscode/blob/main/LICENSE.txt)
 
-The Oracle Java Platform extension brings full featured Java development (edit-compile-debug & test cycle) for Maven and Gradle projects to VS Code, and is available on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Oracle.oracle-java).
+Java Platform extension, from Oracle, brings full featured Java development (edit-compile-debug & test cycle) for Maven and Gradle projects to VS Code, and is available on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Oracle.oracle-java).
 
 ## Getting Started
 1. Set JDK in `View | Command Palette | Preferences:Open User Settings (JSON) ...` __jdk: Jdkhome__ setting to point to JDK which Language Server will run on and projects will be compiled with. More below in section [Selecting the JDK](#selecting-the-jdk)
@@ -133,6 +133,11 @@ Go to VSCode `View | Command Palette | Preferences:Open User Settings | Extensio
 
 Please refer to [Java formatting preferences](https://github.com/oracle/javavscode/wiki/Java-formatting-preferences) wiki for more info.
 
+## Hints Preferences
+Easily update default hint preferences by adjusting a simple configuration option to tailor hint preferences to specific needs.
+
+Go to VSCode `View | Command Palette | Preferences:Open User Settings | Extensions | Java`  and set `Jdk › Hints: Preferences:` option to the xml hint preferences file.
+
 ## Organize Imports
 Out of the box support for organizing imports in Java sources is available. It removes unused imports, groups imports by packages and updates your imports whenever a file is saved. In addition to the defaults, there is a rich set of configuration options. 
 
@@ -170,12 +175,18 @@ following locations:
 
 As soon as one of the settings is changed, the Language Server is restarted.
 
+## Disable the embedded nb-javac and use javac from the JDK
+`View | Command Palette | Preferences:Open User Settings | Jdk > Advanced > Disable: Nbjavac` setting facilitates simpler experimentation with early access JDK builds. JDK early access builds can be specified in `jdk.jdkhome`, and nb-javac can be disabled, ensuring that the extension utilizes the javac from the early access build.
+
 ## Running Language Server per VSCode workspace or for user
 It is possible to run Oracle Java Platform extension per workspace (VSCode window). This allows separation of Language Server for given project as Language Server JVM is not shared for more VSCode open workspaces (projects).
 It is possible to change this in `View | Command Palette | Preferences:Open User Settings | Jdk: Userdir`. Set to `local` to use dedicated Language Server per workspace or set to `global` to have one Language Server for all VS Code workspaces.
 
 ## Troubleshooting
 If your extension is not starting and throwing some error like no JDK found even if you have a working JDK installed in your machine, then you can try deleting cache for the workspace using `View | Command Palette | Delete oracle java extension cache for this workspace`. 
+
+## Workspace
+The extension will analyze the content of the opened workspace, and relevant other files. If the workspace contains a lot of data, this may take a long time. It is therefore recommended to avoid adding unnecessarily big folders in a workspace. Specifically, it is not recommended to open user's home directory as a part of the workspace.
 
 ## Contributing
 
@@ -187,7 +198,7 @@ Please consult the [security guide](https://github.com/oracle/javavscode/blob/ma
 
 ## License
 
-Copyright (c) 2023 Oracle and/or its affiliates.
+Copyright (c) 2024 Oracle and/or its affiliates.
 
 Oracle Java Platform Extension for Visual Studio Code is licensed under [Apache 2.0 License](https://github.com/oracle/javavscode/blob/main/LICENSE.txt). 
 The [THIRD_PARTY_LICENSES](https://github.com/oracle/javavscode/blob/main/THIRD_PARTY_LICENSES.txt) file contains third party notices and licenses.
