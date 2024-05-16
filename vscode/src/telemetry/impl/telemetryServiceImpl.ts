@@ -4,8 +4,8 @@ import { TelemetryEventQueue } from "./telemetryEventQueue";
 import { TelemetryPrefs } from "./telemetryPrefs";
 import { AnonymousIdManager } from "./AnonymousIdManager";
 import { StaticInfo, TelemetryService, TelemetryEvent } from "../types";
-import { postTelemetry } from "./ociMetrics";
 import { OutputChannel } from 'vscode';
+import { postTelemetry } from "./postTelemetry";
 
 export class TelemetryServiceImpl implements TelemetryService {
     private activationTime: number = getCurrentUTCDateInSeconds();
@@ -38,9 +38,9 @@ export class TelemetryServiceImpl implements TelemetryService {
                 return;
             }
             this.logger.appendLine(JSON.stringify(event, null, 4));
-            const doc = await postTelemetry(event); 
+            const doc = await postTelemetry(event);
             this.logger.appendLine("Telemetry Posted Successfully!!");
-            this.logger.appendLine(doc.opcRequestId)
+            // this.logger.appendLine(doc.opcRequestId)
         } catch (err: any) {
             this.logger.appendLine(`Error Occurred!! while sending telemetry: ${event?.name}: `);
             this.logger.appendLine(err?.message || "No error message");
