@@ -13,8 +13,6 @@ export const DISTRO = getDistribution();
 export const TIMEZONE = getTimeZone();
 export const COUNTRY = getCountry(TIMEZONE);
 export const LOCALE = getLocale();
-// export const USERNAME = getUsername();
-
 
 function getPlatform(): string {
     const platform: string = os.platform();
@@ -51,21 +49,6 @@ async function getDistribution(): Promise<string | undefined> {
     return undefined;
 }
 
-// function getUsername(): string | undefined {
-//     const env = process.env || {};
-//     let username = (
-//         env.SUDO_USER ||
-//         env.LOGNAME ||
-//         env.USER ||
-//         env.LNAME ||
-//         env.USERNAME
-//     );
-//     if (!username) {
-//         username = os.userInfo()?.username;
-//     }
-//     return username;
-// }
-
 export async function getStaticInfo(context: ExtensionContext, packageJson: any): Promise<StaticInfo> {
     return {
         extension: {
@@ -89,7 +72,6 @@ export async function getStaticInfo(context: ExtensionContext, packageJson: any)
             timezone: TIMEZONE,
             locale: LOCALE,
             country: COUNTRY
-        },
-        // username: USERNAME
+        }
     };
 }
