@@ -1,3 +1,5 @@
+import { Uri } from "vscode"
+
 export interface StaticInfo {
     extension: ExtensionInfo,
     vscodeInfo: VscodeInfo,
@@ -49,4 +51,14 @@ export interface TelemetryService {
     flushQueue(): Promise<void>;
 
     dispose(): Promise<void>;
+}
+
+export interface CacheService {
+    get(key: string): Promise<undefined | string>;
+
+    put(key: string, value: string): Promise<boolean>;
+
+    getCachePath(): Uri;
+
+    isCacheDirExists(): Promise<boolean>;
 }

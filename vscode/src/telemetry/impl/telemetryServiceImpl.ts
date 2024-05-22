@@ -1,9 +1,9 @@
 import { ERROR_TYPE_TELEMETRY } from "../utils/constants";
-import { getCurrentUTCDateInSeconds } from "../utils/utils";
+import { getCurrentUTCDateInSeconds, getHashCode } from "../utils/utils";
 import { TelemetryEventQueue } from "./telemetryEventQueue";
 import { TelemetryPrefs } from "./telemetryPrefs";
 import { AnonymousIdManager } from "./AnonymousIdManager";
-import { StaticInfo, TelemetryService, TelemetryEvent } from "../types";
+import { StaticInfo, TelemetryService, TelemetryEvent, CacheService } from "../types";
 import { OutputChannel } from 'vscode';
 import { postTelemetry } from "./postTelemetry";
 
@@ -15,11 +15,13 @@ export class TelemetryServiceImpl implements TelemetryService {
         private anonymousId: AnonymousIdManager,
         private settings: TelemetryPrefs,
         private staticInfo: StaticInfo,
-        private logger: OutputChannel) {
+        private logger: OutputChannel,
+        private cacheService: CacheService
+    ) {
     }
 
     public async send(event: TelemetryEvent): Promise<void> {
-        if(!("data" in event)){
+        if (!("data" in event)) {
             event["data"] = {};
         }
         event.data.machineId = this.anonymousId.getMachineId();
@@ -27,7 +29,7 @@ export class TelemetryServiceImpl implements TelemetryService {
 
         if (this.settings.checkTelemetryStatus()) {
             this.sendEvent(event);
-        } else if(!this.settings.isExtTelemetryConfigured()){
+        } else if (!this.settings.isExtTelemetryConfigured()) {
             this.queue.addEvent(event);
         }
     }
@@ -40,7 +42,6 @@ export class TelemetryServiceImpl implements TelemetryService {
             this.logger.appendLine(JSON.stringify(event, null, 4));
             const doc = await postTelemetry(event);
             this.logger.appendLine("Telemetry Posted Successfully!!");
-            // this.logger.appendLine(doc.opcRequestId)
         } catch (err: any) {
             this.logger.appendLine(`Error Occurred!! while sending telemetry: ${event?.name}: `);
             this.logger.appendLine(err?.message || "No error message");
@@ -48,7 +49,17 @@ export class TelemetryServiceImpl implements TelemetryService {
     }
 
     public async startEvent(event: TelemetryEvent): Promise<void> {
-        return this.send({ ...event, data: { ...event?.data, environment: this.staticInfo } });
+        const ENVIRONMENT_INFO = "environmentInfo";
+        const value: string | undefined = await this.cacheService.get(ENVIRONMENT_INFO);
+        const envString = JSON.stringify(this.staticInfo);
+        const calculatedHashVal = getHashCode(envString);
+        if (value != calculatedHashVal) {
+            const isAdded = await this.cacheService.put(ENVIRONMENT_INFO, envString);
+            this.logger.appendLine(`${ENVIRONMENT_INFO} added in cache ${isAdded ? "Successfully" : "Unsucessfully"}`);
+
+            return this.send({ ...event, data: { ...event?.data, environment: this.staticInfo } });
+        }
+        this.logger.appendLine(`same ${ENVIRONMENT_INFO} already sent earlier`);
     }
 
     public async closeEvent(event: TelemetryEvent): Promise<void> {

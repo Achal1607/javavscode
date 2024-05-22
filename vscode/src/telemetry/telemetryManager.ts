@@ -1,12 +1,14 @@
-import { ConfigurationChangeEvent, ExtensionContext, OutputChannel, window, workspace } from "vscode";
+import { ConfigurationChangeEvent, ExtensionContext, OutputChannel, Uri, window, workspace } from "vscode";
 import { AnonymousIdManager } from "./impl/AnonymousIdManager";
 import { TelemetryPrefs } from "./impl/telemetryPrefs";
 import { TelemetryEventQueue } from "./impl/telemetryEventQueue";
 import { readPackageJson } from "./utils/utils";
 import { getStaticInfo } from "./impl/staticInfoImpl";
 import { TelemetryServiceImpl } from "./impl/telemetryServiceImpl";
-import { StaticInfo, TelemetryService } from "./types";
+import { CacheService, StaticInfo, TelemetryService } from "./types";
 import { TELEMETRY_COMMAND } from "./utils/constants";
+import { CacheServiceImpl } from "./impl/cacheServiceImpl";
+import * as path from "path";
 
 export class TelemetryManager {
     private extensionContext: ExtensionContext;
@@ -15,6 +17,7 @@ export class TelemetryManager {
     private environment?: StaticInfo;
     private reporter?: TelemetryService;
     private packageJson?: any;
+    private cacheService?: CacheService;
     public logger: OutputChannel;
 
     constructor(extensionContext: ExtensionContext) {
@@ -29,6 +32,11 @@ export class TelemetryManager {
         this.environment = await getStaticInfo(this.extensionContext, this.packageJson);
         return this;
     }
+    public async setCacheService(): Promise<TelemetryManager> {
+        const cachePath = Uri.joinPath(this.extensionContext.globalStorageUri, "telemetry", "cache");
+        this.cacheService = new CacheServiceImpl(cachePath)
+        return this;
+    }
 
     public async setPackageJson(): Promise<TelemetryManager> {
         this.packageJson = await readPackageJson(this.extensionContext.extension.extensionPath);
@@ -39,9 +47,12 @@ export class TelemetryManager {
         if (!this.environment) {
             await this.setStaticInfo();
         }
+        if (!this.cacheService) {
+            await this.setCacheService()
+        }
 
         const queue = new TelemetryEventQueue();
-        this.reporter = new TelemetryServiceImpl(queue, this.anonymousId!, this.settings, this.environment!, this.logger);
+        this.reporter = new TelemetryServiceImpl(queue, this.anonymousId!, this.settings, this.environment!, this.logger, this.cacheService!);
         this.extensionContext.subscriptions.push(this.onDidChangeTelemetryEnabled());
         this.openTelemetryDialog();
 
