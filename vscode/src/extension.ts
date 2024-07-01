@@ -70,6 +70,7 @@ import { InputStep, MultiStepInput } from './utils';
 import { env } from 'process';
 import { PropertiesView } from './propertiesView/propertiesView';
 import { openJDKSelectionView } from './jdkDownloader';
+import { runMigrationAnalysis } from './javaMigrationAnalysis';
 
 const API_VERSION : string = "1.0";
 const SERVER_NAME : string = "Oracle Java SE Language Server";
@@ -444,7 +445,36 @@ export function activate(context: ExtensionContext): VSNetBeansAPI {
             throw `Client ${c} doesn't support new project`;
         }
     }));
-
+    
+    context.subscriptions.push(commands.registerCommand(COMMAND_PREFIX + '.migration.analysis', async (ctx) => {
+        try {
+            const {migrationReport, csvReportPath}: any | null = await runMigrationAnalysis(context.storageUri?.fsPath, log);
+        
+            if (migrationReport) {
+                vscode.window.showInformationMessage(`Migration analysis report is ready`, "See Report").then(selection =>{
+                    if (selection === "See Report") {
+                        vscode.env.openExternal(vscode.Uri.parse(migrationReport));
+                    }
+                });
+            }
+            else {
+                throw new Error("Error creating migration report");
+            }
+            if (csvReportPath) {
+                vscode.window.showInformationMessage(`Third party library suggestions is ready`, "Check suggestions").then(thirdPartyLookup =>{
+                    if (thirdPartyLookup === "Check suggestions") {
+                        vscode.env.openExternal(vscode.Uri.parse(csvReportPath));
+                    }
+                });
+            }
+            else {
+                throw new Error("Error creating third party library suggestions report");
+            }
+        } catch (err: any) {
+            vscode.window.showErrorMessage(err.message);
+        }
+    }));
+    
     context.subscriptions.push(commands.registerCommand(COMMAND_PREFIX + '.goto.test', async (ctx) => {
         let c: LanguageClient = await client;
         const commands = await vscode.commands.getCommands();

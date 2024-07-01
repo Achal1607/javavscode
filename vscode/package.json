@@ -4,7 +4,7 @@
 	"description": "Oracle Java Platform Extension for Visual Studio Code",
 	"author": "Oracle",
 	"license": "Apache 2.0",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"preview": false,
 	"repository": {
 		"type": "git",
@@ -445,6 +445,11 @@
 				"command": "jdk.goto.test",
 				"title": "Go To Test/Tested class...",
 				"category": "Java"
+			},
+			{
+				"command": "jdk.migration.analysis",
+				"title": "Migration Analysis",
+				"category": "Project"
 			}
 		],
 		"keybindings": [
@@ -523,6 +528,10 @@
 				},
 				{
 					"command": "jdk.workspace.compile",
+					"when": "nbJdkReady"
+				},
+				{
+					"command": "jdk.migration.analysis",
 					"when": "nbJdkReady"
 				},
 				{
