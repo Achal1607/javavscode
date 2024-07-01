@@ -577,10 +577,6 @@
 					"when": "nbJdkReady"
 				},
 				{
-					"command": "jdk.migration.analysis",
-					"when": "nbJdkReady"
-				},
-				{
 					"command": "jdk.open.test",
 					"when": "nbJdkReady && editorLangId == java"
 				},
