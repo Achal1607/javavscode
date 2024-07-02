@@ -67,7 +67,7 @@ import { initializeRunConfiguration, runConfigurationProvider, runConfigurationN
 import { InputStep, MultiStepInput } from './utils';
 import { PropertiesView } from './propertiesView/propertiesView';
 import { openJDKSelectionView } from './jdkDownloader';
-import { runMigrationAnalysis } from './javaMigrationAnalysis';
+import { JavaMigrationAnalysis } from './javaMigrationAnalysis';
 
 const API_VERSION : string = "1.0";
 const SERVER_NAME : string = "Oracle Java SE Language Server";
@@ -79,7 +79,7 @@ let nbProcess : ChildProcess | null = null;
 let debugPort: number = -1;
 let debugHash: string | undefined;
 let consoleLog: boolean = !!process.env['ENABLE_CONSOLE_LOG'];
-
+let javaMigrationAnalysis: JavaMigrationAnalysis | null = null;
 export class NbLanguageClient extends LanguageClient {
     private _treeViewService: TreeViewService;
 
@@ -330,6 +330,8 @@ class InitialPromise extends Promise<NbLanguageClient> {
 export function activate(context: ExtensionContext): VSNetBeansAPI {
     let log = vscode.window.createOutputChannel(SERVER_NAME);
 
+    javaMigrationAnalysis = new JavaMigrationAnalysis(log);
+
     var clientResolve : (x : NbLanguageClient) => void;
     var clientReject : (err : any) => void;
 
@@ -456,27 +458,19 @@ export function activate(context: ExtensionContext): VSNetBeansAPI {
     
     context.subscriptions.push(commands.registerCommand(COMMAND_PREFIX + '.migration.analysis', async (ctx) => {
         try {
-            const {migrationReport, csvReportPath}: any | null = await runMigrationAnalysis(context.storageUri?.fsPath, log);
+            const migrationReportPath: string | null = await javaMigrationAnalysis!.runMigrationAnalysis();
         
-            if (migrationReport) {
+            if (migrationReportPath) {
                 vscode.window.showInformationMessage(`Migration analysis report is ready`, "See Report").then(selection =>{
                     if (selection === "See Report") {
-                        vscode.env.openExternal(vscode.Uri.parse(migrationReport));
+                        vscode.env.openExternal(vscode.Uri.parse(migrationReportPath));
                     }
                 });
+
+                await javaMigrationAnalysis!.createDiagnostics();
             }
             else {
                 throw new Error("Error creating migration report");
-            }
-            if (csvReportPath) {
-                vscode.window.showInformationMessage(`Third party library suggestions is ready`, "Check suggestions").then(thirdPartyLookup =>{
-                    if (thirdPartyLookup === "Check suggestions") {
-                        vscode.env.openExternal(vscode.Uri.parse(csvReportPath));
-                    }
-                });
-            }
-            else {
-                throw new Error("Error creating third party library suggestions report");
             }
         } catch (err: any) {
             vscode.window.showErrorMessage(err.message);

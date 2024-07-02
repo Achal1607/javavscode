@@ -4,7 +4,7 @@
 	"description": "Java Platform Extension for Visual Studio Code",
 	"author": "Oracle",
 	"license": "Apache 2.0",
-	"version": "0.1.0",
+	"version": "24.0.0",
 	"preview": false,
 	"repository": {
 		"type": "git",
@@ -221,6 +221,11 @@
 					"type": "boolean",
 					"default": false,
 					"description": "Advanced option: disable nb-javac library, javac from the selected JDK will be used. The selected JDK must be at least JDK 22."
+				},
+				"jdk.migration.jdkhome": {
+					"type": "string",
+					"default": "",
+					"description": "Provide path of java to be used for migration analysis. Otherwise it uses jdk version which extension has detected."
 				}
 			}
 		},
