@@ -175,7 +175,7 @@ export class JavaMigrationAnalysis {
                 if (hyperlink) {
                     diagnostic.relatedInformation = [
                         new vscode.DiagnosticRelatedInformation(
-                            new vscode.Location(vscode.Uri.parse(hyperlink), new vscode.Range(lineNumber, lineContent.range.start.character, lineNumber, lineContent.range.end.character)),
+                            new vscode.Location(vscode.Uri.parse(hyperlink), new vscode.Position(lineNumber, lineContent.range.start.character)),
                             'Link to documentation'
                         )
                     ];
