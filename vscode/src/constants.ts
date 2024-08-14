@@ -13,6 +13,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 */
+export namespace TelemetryEvents {
+  export const ERROR = "ERROR";
+  export const INFO = "INFO";
+  export const STARTUP_EVT = "STARTUP_EVT";
+  export const CLOSE_EVT = "CLOSE_EVT";
+  export const SCAN_START_EVT = "SCAN_START_EVT";
+  export const SCAN_END_EVT = "SCAN_END_EVT";
+}
 
 export const JDK_RELEASES_TRACK_URL = `https://www.java.com/releases/releases.json`;
 

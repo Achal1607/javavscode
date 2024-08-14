@@ -43,8 +43,7 @@ import {
     ErrorHandlerResult,
     CloseHandlerResult,
     SymbolInformation,
-    TextDocumentFilter,
-    TelemetryEventNotification
+    TextDocumentFilter
 } from 'vscode-languageclient';
 
 import * as net from 'net';
@@ -67,6 +66,9 @@ import { initializeRunConfiguration, runConfigurationProvider, runConfigurationN
 import { InputStep, MultiStepInput } from './utils';
 import { PropertiesView } from './propertiesView/propertiesView';
 import { openJDKSelectionView } from './jdkDownloader';
+import { TelemetryEvents } from './constants';
+import { Telemetry } from './telemetry';
+import { TelemetryManager } from './telemetry/telemetryManager';
 
 const API_VERSION : string = "1.0";
 const SERVER_NAME : string = "Oracle Java SE Language Server";
@@ -78,6 +80,7 @@ let nbProcess : ChildProcess | null = null;
 let debugPort: number = -1;
 let debugHash: string | undefined;
 let consoleLog: boolean = !!process.env['ENABLE_CONSOLE_LOG'];
+let telemetryService: Promise<TelemetryManager>; 
 
 export class NbLanguageClient extends LanguageClient {
     private _treeViewService: TreeViewService;
@@ -338,6 +341,8 @@ export function activate(context: ExtensionContext): VSNetBeansAPI {
         clientReject = reject;
     });
 
+    telemetryService =  Telemetry.initializeTelemetry(context);
+    
     // find acceptable JDK and launch the Java part
     findJDK((specifiedJDK) => {
         let currentClusters = findClusters(context.extensionPath).sort();
@@ -1207,22 +1212,37 @@ function doActivateWithJDK(specifiedJDK: string | null, context: ExtensionContex
                     });
                 }
             });
-            c.onNotification(TelemetryEventNotification.type, (param) => {
-                const ls = listeners.get(param);
-                if (ls) {
-                    for (const listener of ls) {
-                        commands.executeCommand(listener);
-                    }
-                }
-            });
             handleLog(log, 'Language Client: Ready');
             setClient[0](c);
             commands.executeCommand('setContext', 'nbJdkReady', true);
-        
+
+            telemetryService.then(() => {
+                Telemetry.serverInitializedReceived = true;
+                Telemetry.sendTelemetry(TelemetryEvents.STARTUP_EVT, TelemetryEvents.INFO);
+            });
+
+            c.onTelemetry(async (e) => {
+                await telemetryService;
+                if ([TelemetryEvents.SCAN_START_EVT, TelemetryEvents.SCAN_END_EVT].includes(e.name)) {
+                    const ls = listeners.get(e);
+                    if (ls) {
+                        for (const listener of ls) {
+                            commands.executeCommand(listener);
+                        }
+                    }
+                }
+                else {
+                    Telemetry.sendTelemetry(e.name, (e.type as string).toUpperCase(), e?.properties);
+                }
+            });
+
             // create project explorer:
             //c.findTreeViewService().createView('foundProjects', 'Projects', { canSelectMany : false });
             createProjectView(context, c);
-        }).catch(setClient[1]);
+        }).catch((err)=>{
+            Telemetry.sendTelemetry(TelemetryEvents.STARTUP_EVT, TelemetryEvents.ERROR, err?.message);
+            setClient[1];
+        });
     }).catch((reason) => {
         activationPending = false;
         handleLog(log, reason);
@@ -1403,6 +1423,11 @@ function stopClient(clientPromise: Promise<LanguageClient>): Thenable<void> {
     if (testAdapter) {
         testAdapter.dispose();
         testAdapter = undefined;
+    }
+    if(Telemetry.serverInitializedReceived){
+        telemetryService.then(()=>{
+            Telemetry.sendTelemetry(TelemetryEvents.CLOSE_EVT, TelemetryEvents.INFO);
+        });
     }
     return clientPromise && !(clientPromise instanceof InitialPromise) ? clientPromise.then(c => c.stop()) : Promise.resolve();
 }

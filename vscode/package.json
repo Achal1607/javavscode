@@ -4,7 +4,7 @@
 	"description": "Java Platform Extension for Visual Studio Code",
 	"author": "Oracle",
 	"license": "Apache 2.0",
-	"version": "1.0.0",
+	"version": "22.0.0",
 	"preview": false,
 	"repository": {
 		"type": "git",
@@ -161,6 +161,11 @@
 				"jdk.hints.preferences": {
 					"type": "string",
 					"description": "Path to the file containing exported hints preferences",
+					"default": null
+				},
+				"jdk.telemetry.enabled": {
+					"type": "boolean",
+					"description": "Allow extension to collect important metrics for improvement",
 					"default": null
 				},
 				"jdk.java.onSave.organizeImports": {
@@ -764,15 +769,16 @@
 		"artifactory:check": "node ./esbuild.js --artifactory-check"
 		},
 	"devDependencies": {
+		"@types/getos": "^3.0.4",
 		"@types/glob": "^7.1.1",
 		"@types/mocha": "^9.0.0",
-		"@types/node": "^13.11.0",
+		"@types/node": "^18.19.1",
+		"@types/node-fetch": "^2.6.11",
 		"@types/ps-node": "^0.1.0",
 		"@types/vscode": "^1.76.0",
 		"@types/vscode-webview": "^1.57.1",
 		"@vscode/codicons": "0.0.29",
 		"esbuild": "^0.16.17",
-		"glob": "^7.1.6",
 		"mocha": "^9.1.2",
 		"ps-node": "^0.1.6",
 		"typescript": "^4.6.4",
@@ -783,6 +789,10 @@
 		"@vscode/webview-ui-toolkit": "^1.2.2",
 		"axios": "^1.6.8",
 		"jsonc-parser": "3.3.1",
+		"countries-and-timezones": "^3.6.0",
+		"getos": "^3.2.1",
+		"oci-common": "^2.82.1",
+		"oci-loggingingestion": "^2.82.1",
 		"vscode-languageclient": "^8.1.0"
 	}
 }
