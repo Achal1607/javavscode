@@ -24,6 +24,36 @@
 -->
 
 <!-- This file has been modified for Oracle Java SE extension -->
+## Version 22.1.1
+### What's Changed
+
+### Enhancements
+* [JAVAVSCODE-172] Support for using JDK 23 EA builds with the extension including features like ClassFile API, Implicitly Declared Classes and Instance Main Methods, etc. https://github.com/oracle/javavscode/pull/174
+* [JAVAVSCODE-175] Support for JEP 467 (Markdown format for Javadoc) added https://github.com/oracle/javavscode/pull/176
+* [JAVAVSCODE-74] Support for running a project with dependencies not managed by Maven or Gradle https://github.com/oracle/javavscode/pull/173 
+* Upgrading to NB-22 https://github.com/oracle/javavscode/pull/169
+
+### Other Changes
+* Bump braces from 3.0.2 to 3.0.3 https://github.com/oracle/javavscode/pull/171
+* [JAVAVSCODE-110] Updated README for troubleshoot guide https://github.com/oracle/javavscode/pull/169
+
+**Full Changelog**: https://github.com/oracle/javavscode/compare/v22.0.1...v22.1.1
+
+## Version 22.0.1 (May 30th, 2024)
+### What's Changed
+
+### Bugs
+* [JAVAVSCODE-59] In VSCode provide quickfix relevant to the position of the cursor https://github.com/apache/netbeans/pull/7353
+* [JAVAVSCODE-101] Command jdk.java.project.resolveProjectProblems' not found https://github.com/apache/netbeans/pull/7370
+
+### Other Changes
+* Disable unused modules https://github.com/oracle/javavscode/pull/159
+* Copyright modification in README https://github.com/oracle/javavscode/pull/155
+* Minor README updates https://github.com/oracle/javavscode/pull/157
+* Provide better tags in vscode marketplace https://github.com/oracle/javavscode/pull/162
+
+**Full Changelog**: https://github.com/oracle/javavscode/compare/v22.0.0...v22.0.1
+
 ## Version 22.0.0 (April 25th, 2024)
 ### What's Changed
 

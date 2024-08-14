@@ -26,7 +26,7 @@
 		"OpenJDK",
 		"Maven",
 		"Gradle",
-		"java properties", 
+		"java properties",
 		"junit",
 		"multi-root ready",
 		"multiroot"
@@ -45,6 +45,18 @@
 	"main": "./out/extension.js",
 	"contributes": {
 		"languages": [
+			{
+				"id": "java",
+				"extensions": [
+					".java",
+					".jav"
+				],
+				"aliases": [
+					"Java",
+					"java"
+				],
+				"configuration": "./language-configuration.json"
+			},
 			{
 				"id": "javascript",
 				"mimetypes": [
@@ -473,13 +485,13 @@
 				"title": "Download, install and use JDK"
 			},
 			{
-				"command": "jdk.goto.test",
+				"command": "jdk.open.test",
 				"title": "Go To Test/Tested class...",
 				"category": "Java"
 			},
 			{
 				"command": "jdk.delete.cache",
-				"title": "Delete oracle java extension cache for this workspace"
+				"title": "Delete Oracle Java extension cache for this workspace"
 			}
 		],
 		"keybindings": [
@@ -509,7 +521,7 @@
 					"group": "navigation@100"
 				},
 				{
-					"command": "jdk.goto.test",
+					"command": "jdk.open.test",
 					"when": "nbJdkReady && editorLangId == java",
 					"group": "navigation@101"
 				},
@@ -531,7 +543,7 @@
 					"group": "navigation@3"
 				},
 				{
-					"command": "jdk.goto.test",
+					"command": "jdk.open.test",
 					"when": "nbJdkReady && resourceExtname == .java",
 					"group": "goto@1"
 				},
@@ -561,7 +573,7 @@
 					"when": "nbJdkReady"
 				},
 				{
-					"command": "jdk.goto.test",
+					"command": "jdk.open.test",
 					"when": "nbJdkReady && editorLangId == java"
 				},
 				{
@@ -753,8 +765,9 @@
 		"test": "node ./out/test/runTest.js",
 		"nbcode": "node ./out/nbcode.js",
 		"nbjavac": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install .*nbjavac.*",
-		"apisupport": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install '(org.netbeans.libs.xerces|org.netbeans.modules.editor.structure|org.netbeans.modules.xml|org.netbeans.modules.xml.axi|org.netbeans.modules.xml.retriever|org.netbeans.modules.xml.schema.model|org.netbeans.modules.xml.tax|org.netbeans.modules.xml.text|org.netbeans.modules.ant.browsetask|.*apisupport.*|org.netbeans.modules.debugger.jpda.ant)' && node ./out/nbcode.js -J-Dnetbeans.close=true --modules --enable .*apisupport.ant"
-	},
+		"apisupport": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install '(org.netbeans.libs.xerces|org.netbeans.modules.editor.structure|org.netbeans.modules.xml|org.netbeans.modules.xml.axi|org.netbeans.modules.xml.retriever|org.netbeans.modules.xml.schema.model|org.netbeans.modules.xml.tax|org.netbeans.modules.xml.text|org.netbeans.modules.ant.browsetask|.*apisupport.*|org.netbeans.modules.debugger.jpda.ant)' && node ./out/nbcode.js -J-Dnetbeans.close=true --modules --enable .*apisupport.ant",
+		"artifactory:check": "node ./esbuild.js --artifactory-check"
+		},
 	"devDependencies": {
 		"@types/getos": "^3.0.4",
 		"@types/glob": "^7.1.1",
@@ -775,9 +788,9 @@
 		"@vscode/debugadapter": "^1.65.0",
 		"@vscode/webview-ui-toolkit": "^1.2.2",
 		"axios": "^1.6.8",
+		"jsonc-parser": "3.3.1",
 		"countries-and-timezones": "^3.6.0",
 		"getos": "^3.2.1",
-		"jsonc-parser": "3.2.0",
 		"oci-common": "^2.82.1",
 		"oci-loggingingestion": "^2.82.1",
 		"vscode-languageclient": "^8.1.0"
