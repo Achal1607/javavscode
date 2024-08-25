@@ -30,10 +30,7 @@ import { commands, window } from "vscode";
 import { assertWorkspace, dumpJava, gradleInitJavaApplication } from "../../testutils";
 
 Mocha.before(async () => {
-  window.showInformationMessage('Cleaning up workspace.');
-  let folder: string = assertWorkspace();
-  await fs.promises.rmdir(folder, { recursive: true });
-  await fs.promises.mkdir(folder, { recursive: true });
+  assertWorkspace();
 });
 
 suite("Extension gradle tests", function () {

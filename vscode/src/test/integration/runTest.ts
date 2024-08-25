@@ -37,11 +37,16 @@ async function main() {
 
         const testSuites = fs.readdirSync(path.join(__dirname, 'suite'));
 
-        for (const suiteName of testSuites) {
+        for await (const suiteName of testSuites) {
             // The path to test runner
             // Passed to --extensionTestsPath
             const extensionTestsPath = path.join(__dirname, 'suite', suiteName, 'index');
             const workspaceDir = path.join(__dirname, 'suite', suiteName, 'ws');
+            
+            // Clean workspace before starting tests
+            await fs.promises.rmdir(workspaceDir, { recursive: true });
+            await fs.promises.mkdir(workspaceDir, { recursive: true });
+
             if (!fs.statSync(workspaceDir).isDirectory()) {
                 throw `Expecting ${workspaceDir} to be a directory!`;
             }

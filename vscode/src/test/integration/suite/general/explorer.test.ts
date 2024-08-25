@@ -32,10 +32,7 @@ import * as myExplorer from '../../../../explorer';
 import { assertWorkspace } from '../../testutils';
 
 Mocha.before(async () => {
-    vscode.window.showInformationMessage('Cleaning up workspace.');
-    let folder: string = assertWorkspace();
-    await fs.promises.rmdir(folder, { recursive: true });
-    await fs.promises.mkdir(folder, { recursive: true });
+    assertWorkspace();
 });
 
 suite('Explorer Test Suite', () => {

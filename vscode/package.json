@@ -755,7 +755,7 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./; node ./esbuild.js",
+		"compile": "tsc -p ./ && node ./esbuild.js",
 		"watch": "tsc -watch -p ./ | node ./esbuild.js --watch",
 		"test": "npm run compile && node ./out/test/integration/runTest.js",
 		"nbcode": "node ./out/nbcode.js",
