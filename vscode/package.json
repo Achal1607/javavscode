@@ -755,9 +755,9 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./; node ./esbuild.js",
+		"compile": "tsc -p ./ && node ./esbuild.js",
 		"watch": "tsc -watch -p ./ | node ./esbuild.js --watch",
-		"test": "node ./out/test/runTest.js",
+		"test": "npm run compile && node ./out/test/runTest.js",
 		"nbcode": "node ./out/nbcode.js",
 		"nbjavac": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install .*nbjavac.*",
 		"apisupport": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install '(org.netbeans.libs.xerces|org.netbeans.modules.editor.structure|org.netbeans.modules.xml|org.netbeans.modules.xml.axi|org.netbeans.modules.xml.retriever|org.netbeans.modules.xml.schema.model|org.netbeans.modules.xml.tax|org.netbeans.modules.xml.text|org.netbeans.modules.ant.browsetask|.*apisupport.*|org.netbeans.modules.debugger.jpda.ant)' && node ./out/nbcode.js -J-Dnetbeans.close=true --modules --enable .*apisupport.ant",
@@ -781,7 +781,7 @@
 	"dependencies": {
 		"@vscode/debugadapter": "^1.65.0",
 		"@vscode/webview-ui-toolkit": "^1.2.2",
-		"axios": "^1.7.3",
+		"axios": "^1.7.4",
 		"jsonc-parser": "3.3.1",
 		"vscode-languageclient": "^8.1.0"
 	}
