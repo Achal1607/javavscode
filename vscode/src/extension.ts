@@ -68,7 +68,7 @@ import { InputStep, MultiStepInput } from './utils';
 import { PropertiesView } from './propertiesView/propertiesView';
 import { l10n } from './localiser';
 import { ORACLE_VSCODE_EXTENSION_ID,NODE_WINDOWS_LABEL } from './constants';
-import { JdkDownloaderView } from './jdkDownloader/view';
+import { JdkDownloaderView } from './webViews/jdkDownloader/view';
 
 const API_VERSION : string = "1.0";
 const SERVER_NAME : string = "Oracle Java SE Language Server";
