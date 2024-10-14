@@ -1,19 +1,55 @@
 {
-    "root": true,
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaVersion": 6,
-        "sourceType": "module"
-    },
-    "plugins": [
-        "@typescript-eslint"
-    ],
-    "rules": {
-        "@typescript-eslint/class-name-casing": "warn",
-        "@typescript-eslint/semi": "warn",
-        "curly": "warn",
-        "eqeqeq": "warn",
-        "no-throw-literal": "warn",
-        "semi": "off"
-    }
+	"env": {
+		"es6": true,
+		"node": true
+	},
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": "6",
+		"project": [
+			"tsconfig.json"
+		]
+	},
+	"plugins": [
+        "@stylistic/eslint-plugin-ts",
+		"@typescript-eslint"
+	],
+	"rules": {
+		"@typescript-eslint/no-unnecessary-boolean-literal-compare": "error",
+		"@typescript-eslint/naming-convention": "error",
+		"@typescript-eslint/type-annotation-spacing": "error",
+		"@stylistic/eslint-plugin-ts/semi": [" error", "always"],
+		"no-debugger": "error",
+		"prefer-arrow-callback": [
+			"error",
+			{
+				"allowNamedFunctions": true
+			}
+		],
+		"no-trailing-spaces": "error",
+		"no-underscore-dangle": "error",
+		"no-multiple-empty-lines": "error",
+		"no-var": "error",
+		"prefer-template": "error",
+		"prefer-const": "error",
+		"spaced-comment": [
+			"error",
+			"always",
+			{
+				"markers": [
+					"/"
+				]
+			}
+		]
+	},
+	"overrides": [
+		{
+			"files": [
+				"**/*.test.ts"
+			],
+			"rules": {
+				"prefer-arrow-callback": "off"
+			}
+		}
+	]
 }
