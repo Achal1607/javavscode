@@ -27,10 +27,9 @@ import { ExtensionContext, TextEditorDecorationType } from 'vscode';
 
 
 import * as vscode from 'vscode';
-import { NbTestAdapter } from './testAdapter';
-import { SetTextEditorDecorationParams} from './lsp/protocol';
+import { NbTestAdapter } from './views/TestViewController';
+import { SetTextEditorDecorationParams } from './lsp/protocol';
 import * as launchConfigurations from './launchConfigurations';
-import { initializeRunConfiguration, runConfigurationProvider, runConfigurationNodeProvider, configureRunSettings } from './runConfiguration';
 import { extConstants } from './constants';
 import { ExtensionInfo } from './extensionInfo';
 import { ClientPromise } from './lsp/clientPromise';
@@ -42,10 +41,11 @@ import { VSNetBeansAPI } from './lsp/types';
 import { registerDebugger } from './debugger/debugger';
 import { registerConfigChangeListeners } from './configurations/listener';
 import { registerFileProviders } from './lsp/listeners/textDocumentContentProvider';
+import { createViews } from './views/initializer';
 
 export let LOGGER: ExtensionLogger;
 export namespace globalVars {
-    export const listeners = new Map<string, string[]>();    
+    export const listeners = new Map<string, string[]>();
     export let extensionInfo: ExtensionInfo;
     export let clientPromise: ClientPromise;
     export let debugPort: number = -1;
@@ -68,28 +68,18 @@ export function activate(context: ExtensionContext): VSNetBeansAPI {
     clientInit();
 
     registerDebugger(context);
-    // initialize Run Configuration
-    initializeRunConfiguration().then(initialized => {
-		if (initialized) {
-			context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider(extConstants.COMMAND_PREFIX, runConfigurationProvider));
-			context.subscriptions.push(vscode.window.registerTreeDataProvider('run-config', runConfigurationNodeProvider));
-			context.subscriptions.push(vscode.commands.registerCommand(extConstants.COMMAND_PREFIX + '.workspace.configureRunSettings', (...params: any[]) => {
-				configureRunSettings(context, params);
-			}));
-			vscode.commands.executeCommand('setContext', 'runConfigurationInitialized', true);
-		}
-	});
-
     subscribeCommands(context);
+    createViews(context);
     registerFileProviders(context);
-    
+
     launchConfigurations.updateLaunchConfig();
 
     // register completions:
     launchConfigurations.registerCompletion(context);
+
     return Object.freeze({
-        version : extConstants.API_VERSION,
-        apiVersion : extConstants.API_VERSION
+        version: extConstants.API_VERSION,
+        apiVersion: extConstants.API_VERSION
     });
 }
 

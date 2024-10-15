@@ -15,10 +15,10 @@
 */
 
 import { Disposable, TextEditor, window } from "vscode";
-import { globalVars } from "./extension";
-import { asRanges } from "./lsp/protocol";
+import { globalVars } from "../extension";
+import { asRanges } from "../lsp/protocol";
 
-// TODO: Move to views folder as listeners after it is refactored
+
 
 const visibleTextEditorsChangeHandler = (editors: readonly TextEditor[]) => {
     editors.forEach((editor: any) => {
