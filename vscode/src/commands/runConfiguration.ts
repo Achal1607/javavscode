@@ -14,14 +14,18 @@
   limitations under the License.
 */
 
-import { Disposable, ExtensionContext } from "vscode";
+import { extCommands } from "./commands";
+import { globalVars } from "../extension";
+import { configureRunSettings } from "../views/runConfiguration";
+import { ICommand } from "./types";
 
-export class ExtensionInfo {
-  constructor(private context: ExtensionContext) { }
 
-  getGlobalStorage = () => this.context.globalStorageUri;
-  getWorkspaceStorage = () => this.context.storageUri;
-  getExtensionStorageUri = () => this.context.extensionUri;
-  getExtensionContext = () => this.context;
-  pushSubscription = (listener: Disposable) => this.context.subscriptions.push(listener);
+const configureRunSettingsHandler = (...params: any[]) => {
+  configureRunSettings(globalVars.extensionInfo.getExtensionContext(), params);
 }
+
+
+export const registerRunConfigurationCommands: ICommand[] = [{
+  command: extCommands.configureRunSettings,
+  handler: configureRunSettingsHandler
+}]
