@@ -15,8 +15,9 @@
 */
 
 import { OutputChannel, window } from "vscode";
+import { extConstants } from "./constants";
 
-export enum LogLevel {
+enum LogLevel {
     INFO = 'INFO',
     WARN = 'WARN',
     ERROR = 'ERROR',
@@ -29,16 +30,16 @@ export class ExtensionLogger {
         this.outChannel = window.createOutputChannel(channelName);
     }
 
-    public log(message: string, level: LogLevel = LogLevel.INFO): void {
-        this.outChannel.appendLine(`[${level}]: ${message}`);
+    public log(message: string): void {
+        this.outChannel.appendLine(`[${LogLevel.INFO}]: ${message}`);
     }
 
     public warn(message: string): void {
-        this.log(message, LogLevel.WARN);
+        this.outChannel.appendLine(`[${LogLevel.WARN}]: ${message}`);
     }
 
     public error(message: string): void {
-        this.log(message, LogLevel.ERROR);
+        this.outChannel.appendLine(`[${LogLevel.ERROR}]: ${message}`);
     }
 
     public logNoNL(message: string): void {
@@ -57,3 +58,5 @@ export class ExtensionLogger {
         this.outChannel.dispose();
     }
 }
+
+export const LOGGER = new ExtensionLogger(extConstants.SERVER_NAME);
