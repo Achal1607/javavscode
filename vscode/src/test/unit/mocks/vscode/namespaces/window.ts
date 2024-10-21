@@ -9,6 +9,7 @@ export const mockWindowNamespace = (mockedVSCode: Partial<VSCode>) => {
     mockedVSCode.window = instance(mockedWindow);
     mockCreateWebViewPanel();
     mockCreateOutputChannel();
+    mockMessageView();
 }
 
 const mockCreateWebViewPanel = () => {
@@ -27,3 +28,9 @@ const mockCreateOutputChannel = () => {
         anyString()
     )).thenReturn(instance(mockedOutputChannel));
 } 
+
+const mockMessageView = () => {
+    when(mockedWindow.showErrorMessage(anyString())).thenReturn(Promise.resolve(anyString()));
+    when(mockedWindow.showInformationMessage(anyString())).thenReturn(Promise.resolve(undefined));
+    when(mockedWindow.showWarningMessage(anyString())).thenReturn(Promise.resolve(undefined));
+}
