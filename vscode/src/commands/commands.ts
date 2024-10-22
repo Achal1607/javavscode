@@ -49,7 +49,7 @@ export const extCommands = {
     selectEditorProjs: appendPrefixToCommand('select.editor.projects'),
     attachDebugger: appendPrefixToCommand("java.attachDebugger.connector"),
     loadWorkspaceTests: appendPrefixToCommand("load.workspace.tests"),
-    projectDeleteEntry: "javals.foundProjects.deleteEntry"
+    projectDeleteEntry: appendPrefixToCommand("foundProjects.deleteEntry")
 }
 
 export const builtInCommands = {
