@@ -4,7 +4,24 @@ import * as os from 'os';
 import { env } from 'process';
 import { ChildProcessByStdio, spawn } from 'child_process';
 import { Readable } from 'stream';
-import { findNbcode } from '../lsp/utils';
+
+const findNbcode = (extensionPath: string): string => {
+    let nbcode = os.platform() === 'win32' ?
+        os.arch() === 'x64' ? 'nbcode64.exe' : 'nbcode.exe'
+        : 'nbcode.sh';
+    let nbcodePath = path.join(extensionPath, "nbcode", "bin", nbcode);
+
+    let nbcodePerm = fs.statSync(nbcodePath);
+    if (!nbcodePerm.isFile()) {
+        throw `Cannot execute ${nbcodePath}`;
+    }
+    if (os.platform() !== 'win32') {
+        fs.chmodSync(path.join(extensionPath, "nbcode", "bin", nbcode), "744");
+        fs.chmodSync(path.join(extensionPath, "nbcode", "platform", "lib", "nbexec.sh"), "744");
+        fs.chmodSync(path.join(extensionPath, "nbcode", "java", "maven", "bin", "mvn.sh"), "744");
+    }
+    return nbcodePath;
+}
 
 if (typeof process === 'object' && process.argv0 === 'node') {
     let extension = path.join(process.argv[1], '..', '..', '..');
