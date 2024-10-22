@@ -83,8 +83,9 @@ export function activate(context: ExtensionContext): VSNetBeansAPI {
 
 
 export function deactivate(): Thenable<void> {
-    if (globalVars.nbProcessManager?.getProcess() != null) {
-        globalVars.nbProcessManager?.getProcess()?.kill();
+    const process = globalVars.nbProcessManager;
+    if (process?.getProcess() != null) {
+        process?.getProcess()?.kill();
     }
     return globalVars.clientPromise.stopClient();
 }

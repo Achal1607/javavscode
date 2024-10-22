@@ -79,5 +79,8 @@ export const nbCommands = {
     debuggerConfigurations: appendPrefixToCommand('java.attachDebugger.configurations'),
     runProjectAction: appendPrefixToCommand('project.run.action'),
     buildWorkspace: appendPrefixToCommand('build.workspace'),
-    cleanWorkspace: appendPrefixToCommand('clean.workspace')
+    cleanWorkspace: appendPrefixToCommand('clean.workspace'),
+    clearProjectCaches: appendPrefixToCommand('clear.project.caches'),
+    javaProjectPackages: appendPrefixToCommand('java.get.project.packages'),
+    openStackTrace: appendPrefixToCommand('open.stacktrace')
 }

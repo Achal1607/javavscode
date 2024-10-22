@@ -25,6 +25,7 @@ export const configKeys = {
     formatPrefs: 'format',
     hintPrefs: 'hints',
     importPrefs: 'java.imports',
+    runConfig: 'runCofig',
     runConfigVmOptions: 'runConfig.vmOptions',
     runConfigCwd: 'runConfig.cwd',
     verbose: 'verbose',
