@@ -243,3 +243,7 @@ export const EXTENSION_NAME = "oracle.oracle-java";
 export const DEFAULT_BUNDLE_FILE_NAME = "bundle.l10n.en.json";
 export const SUPPORTED_LANGUAGES = new Set(["ja", "zh-cn"]);
 export const DEFAULT_PACKAGE_FILE_NAME = "package.nls.json";
+
+export const OPENJDK_CHECK_FILES_RESOLVES: string[] = [
+    "src/jdk.javadoc/share/classes/jdk/javadoc/doclet/StandardDoclet.java"
+] 
