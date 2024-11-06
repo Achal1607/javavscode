@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { extensions, languages, Uri, window, workspace } from 'vscode';
 import { assertWorkspace, openFile, runShellCommand, waitCommandsReady } from '../../testutils';
-import { OPENJDK_CHECK_FILES_RESOLVES } from '../../constants';
+import { EXTENSION_NAME, OPENJDK_CHECK_FILES_RESOLVES } from '../../constants';
 import { userdirHandler } from '../../../../configurations/handlers';
 
 let lastFileSize = 0;
@@ -12,7 +12,7 @@ const checkSymbolsResolved = (path: string): boolean => {
     let d = languages.getDiagnostics(Uri.file(path));
     const filterErrorsList = d.filter(el => el.severity == 0);
     console.log("Filtered Errors List Length: " + filterErrorsList.length);
-    return filterErrorsList.length == 0;
+    return d.length > 0 && filterErrorsList.length == 0;
 }
 
 const checkExtensionStartsGivingDiagnostics = (path: string): boolean => {
@@ -100,14 +100,15 @@ suite('Perfomance Test Suite', function () {
     }).timeout(10000);
 
     test("Performance test on OpenJDK repository", async () => {
-        try {
-        const userDirPath = userdirHandler();
         const args = ["--single-branch", "--branch", "master"];
         const gitCmd = `git clone ${args.join(' ')} https://github.com/openjdk/jdk.git .`;
         await runShellCommand(gitCmd, folder);
 
         await waitCommandsReady();
-        console.log("Extension Loaded");
+        try {
+            const userDirPath = userdirHandler();
+            console.log(userDirPath);
+            console.log("Extension Loaded");
             const logPath = path.join(userDirPath, 'var', 'log', 'messages.log');
             setInterval(() => pollLogFile(logPath), 1000);
             const startTime = Date.now();
@@ -120,14 +121,15 @@ suite('Perfomance Test Suite', function () {
             }
 
             await checkIfIndexingCompleted();
-            const endTime = Date.now() - startTime;
-            console.log("END_TIME: " + endTime);
-            const extension = extensions.getExtension('oracle.oracle-java');
+            const timeTaken = Date.now() - startTime;
+            console.log("TIME_TAKEN: " + timeTaken);
+            const extension = extensions.getExtension(EXTENSION_NAME);
             await workspace.fs.writeFile(
                 Uri.file(path.join(__dirname,'..',extension?.packageJSON.version)), 
-                new TextEncoder().encode(endTime.toString()));
+                new TextEncoder().encode(timeTaken.toString()));
 
         } catch (err: any) {
+            console.log(err?.message);
             throw new Error("Symbols not resolved");
         }
     }).timeout(3600 * 1000);
