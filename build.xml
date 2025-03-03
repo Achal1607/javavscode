@@ -55,6 +55,7 @@
             patches/8255.diff
             patches/8260.diff
             patches/8280.diff
+            patches/8289.diff
             patches/mvn-sh.diff
             patches/project-marker-jdk.diff
             patches/generate-dependencies.diff
