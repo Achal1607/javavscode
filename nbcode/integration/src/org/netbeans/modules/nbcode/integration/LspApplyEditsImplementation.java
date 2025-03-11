@@ -1,7 +1,4 @@
-
 /*
- * Copyright (c) 2023, Oracle and/or its affiliates.
- *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.netbeans.modules.nbcode.integration;
 
-import * as assert from 'assert';
+import org.netbeans.modules.java.lsp.server.ui.AbstractApplyEditsImplementation;
+import org.netbeans.spi.lsp.ApplyEditsImplementation;
+import org.openide.util.lookup.ServiceProvider;
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-import * as vscode from 'vscode';
-import { awaitClient } from '../../testutils';
-import * as myExplorer from '../../../../views/projects';
-
-suite('Explorer Test Suite', () => {
-    vscode.window.showInformationMessage('Start explorer tests.');
-
-    test('Explorer can be created', async () => {
-        const lvp = await myExplorer.createViewProvider(await awaitClient(), 'foundProjects');
-        const firstLevelChildren = await (lvp.getChildren() as Thenable<any[]>);
-        assert.strictEqual(firstLevelChildren.length, 0, "No child under the root");
-    }).timeout(60000);
-});
+/**
+ *
+ * @author sdedic
+ */
+@ServiceProvider(service = ApplyEditsImplementation.class, position = 10000)
+public class LspApplyEditsImplementation extends AbstractApplyEditsImplementation{
+    
+}
