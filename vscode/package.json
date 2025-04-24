@@ -267,6 +267,11 @@
 					"type": "array",
 					"default": [],
 					"description": "%jdk.configuration.java.completion.commit.chars%"
+				},
+				"jdk.notebook.classpath": {
+					"type": "string",
+					"default": "",
+					"description": "Classpath that needs to be set for notebooks"
 				}
 			}
 		},
