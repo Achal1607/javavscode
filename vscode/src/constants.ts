@@ -26,15 +26,15 @@ export namespace extConstants {
 }
 
 export namespace jdkDownloaderConstants {
-  
+
   export const ORACLE_JDK_RELEASES_BASE_URL = `https://java.oraclecloud.com/currentJavaReleases`;
 
   export const ORACLE_JDK_BASE_DOWNLOAD_URL = `https://download.oracle.com/java`;
 
   export const ORACLE_JDK_FALLBACK_VESIONS = ['24', '21'];
-  
+
   export const OPEN_JDK_VERSION_DOWNLOAD_LINKS: { [key: string]: string } = {
-    "23": "https://download.java.net/java/GA/jdk23.0.2/6da2a6609d6e406f85c491fcb119101b/7/GPL/openjdk-23.0.2"
+    "24": "https://download.java.net/java/GA/jdk24.0.1/24a58e0e276943138bf3e963e6291ac2/9/GPL/openjdk-24.0.1"
   };  
 }
 

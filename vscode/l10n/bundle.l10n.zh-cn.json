@@ -3,6 +3,8 @@
   "jdk.downloader.html.details":"<p>使用此工具，您可以遵循 <a href='https://www.java.com/freeuselicense'>Oracle 免费条款和条件</a>下载最新的 Oracle Java SE JDK，或者依照 <a href='https://openjdk.org/legal/gplv2+ce.html'>GNU 公共许可证（包含 ClassPath 例外条款）</a>下载 Oracle OpenJDK 构建</p> <p>之后，它将代表您处理安装和配置。</p> <p>这样，您可以充分利用此扩展提供的所有功能。</p>",
   "jdk.downloader.button.label.oracleJdk": "下载 Oracle Java SE JDK",
   "jdk.downloader.label.or": "或",
+  "jdk.downloader.label.openJdk": "OpenJDK",
+  "jdk.downloader.label.oracleJdk": "Oracle JDK",
   "jdk.downloader.button.label.openJdk": "下载 Oracle OpenJDK",
   "jdk.downloader.button.label.selectJdkFromSystem": "从我的系统选择安装的 JDK",
   "jdk.downloader.label.selectOracleJdkVersion": "选择 Oracle Java SE 版本",
@@ -45,7 +47,7 @@
   "jdk.extension.fileSelector.label.testFilesOrSourceFiles": "相互关联的测试文件或源文件",
   "jdk.extension.fileSelector.label.noFileSelected": "未选择任何文件",
   "jdk.extension.fileSelector.label.noTestFound": "找不到测试或测试的类",
-  "jdk.extension.cache.message.confirmToDeleteCache": "是否确实要删除此工作区的高速缓存？",
+  "jdk.extension.cache.message.confirmToDeleteCache": "是否确实要删除此工作区的高速缓存并重新加载窗口？",
   "jdk.extension.cache.label.confirmation.yes":"是",
   "jdk.extension.cache.label.confirmation.cancel":"取消",
   "jdk.extension.cache.message.cacheCleared":"已成功清除此工作区的高速缓存",
@@ -63,7 +65,7 @@
   "jdk.extension.lspServer.message.noJdkFound": "未找到 JDK！",
   "jdk.extension.lspServer.label.downloadAndSetup": "自动下载 JDK 并进行设置",
   "jdk.extension.lspServer.error_message": "初始化时出错：{reason}",
-  "jdk.extension.nbjavac.message.supportedVersionRequired": "需要支持的 javac 版本。请启用 nb-javac 库或使用 JDK 23+",
+  "jdk.extension.nbjavac.message.supportedVersionRequired": "需要支持的 javac 版本。请启用 nb-javac 库或使用 JDK 24+",
   "jdk.extension.nbjavac.label.enableNbjavac": "启用 nb-javac 库",
   "jdk.extension.nbjavac.label.openSettings": "打开设置",
   "jdk.extension.javaSupport.label.installGpl": "安装 GPLv2+CPEx 代码",
@@ -93,5 +95,6 @@
   "jdk.extension.debugger.error_msg.debugAdapterNotInitialized":"Oracle Java SE 调试服务器适配器尚未初始化。请稍候，然后重试。",
   "jdk.workspace.new.prompt": "输入生成新文件的目录路径",
   "jdk.extension.utils.error_message.failedHttpsRequest": "无法获取 {url} ({statusCode})",
-  "jdk.extension.error_msg.notEnabled": "{SERVER_NAME} 未启用"
+  "jdk.extension.error_msg.notEnabled": "{SERVER_NAME} 未启用",
+  "jdk.telemetry.consent": "是否允许向 Oracle 报告匿名遥测数据？您随时可以通过 jdk.telemetry.enabled 对应的设置选择退出或加入。"
 }
