@@ -254,24 +254,48 @@
 					"default": 10000,
 					"description": "%jdk.debugger.configuration.completion.warning.time.description%"
 				},
+				"jdk.notebook.classpath": {
+					"type": "string",
+					"default": "",
+					"description": "Classpath that needs to be set for notebooks"
+				},
+				"jdk.notebook.modulepath": {
+					"type": "string",
+					"default": "",
+					"description": "Modulepath that needs to be set for notebooks"
+				},
+				"jdk.notebook.addmodules": {
+					"type": "string",
+					"default": "",
+					"description": "Modules needs for notebooks"
+				},
+				"jdk.notebook.enablePreview": {
+					"type": "boolean",
+					"default": false,
+					"description": "Flag to enable jdk preview features for notebooks"
+				},
+				"jdk.notebook.implicitImports": {
+					"type": "array",
+					"default": [
+						"java.util.*",
+						"java.io.*",
+						"java.math.*"
+					],
+					"description": "list of packages to import implicitly."
+				},
 				"jdk.telemetry.enabled": {
 					"type": "boolean",
 					"description": "%jdk.configuration.telemetry.enabled.description%",
 					"markdownDescription": "%jdk.configuration.telemetry.enabled.markdownDescription%",
 					"default": false,
 					"tags": [
-                        "telemetry"
-          			]
+						"telemetry"
+					]
 				},
 				"jdk.java.completion.commit.chars": {
 					"type": "array",
 					"default": [],
 					"description": "%jdk.configuration.java.completion.commit.chars%"
-				},
-				"jdk.notebook.classpath": {
-					"type": "string",
-					"default": "",
-					"description": "Classpath that needs to be set for notebooks"
 				}
 			}
 		},
