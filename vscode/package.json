@@ -618,6 +618,11 @@
 					"command": "jdk.project.debug",
 					"when": "nbJdkReady && editorLangId == java && resourceExtname == .java",
 					"group": "javadebug@2"
+				},
+				{
+					"command": "jdk.jshell.project",
+					"when": "nbJdkReady && editorLangId == java && resourceExtname == .java",
+					"group": "javadebug@3"
 				}
 			],
 			"explorer/context": [
@@ -645,6 +650,11 @@
 					"command": "jdk.project.debug",
 					"when": "nbJdkReady && resourceExtname == .java",
 					"group": "javadebug@2"
+				},
+				{
+					"command": "jdk.jshell.project",
+					"when": "nbJdkReady && resourceExtname == .java",
+					"group": "javadebug@3"
 				}
 			],
 			"commandPalette": [
