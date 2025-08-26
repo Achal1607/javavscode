@@ -258,22 +258,22 @@
 				"jdk.notebook.classpath": {
 					"type": "string",
 					"default": "",
-					"description": "Classpath that needs to be set for notebooks"
+					"description": "%jdk.notebook.classpath.description%"
 				},
 				"jdk.notebook.modulepath": {
 					"type": "string",
 					"default": "",
-					"description": "Modulepath that needs to be set for notebooks"
+					"description": "%jdk.notebook.modulepath.description%"
 				},
 				"jdk.notebook.addmodules": {
 					"type": "string",
 					"default": "",
-					"description": "Modules needs for notebooks"
+					"description": "%jdk.notebook.addmodules.description%"
 				},
 				"jdk.notebook.enablePreview": {
 					"type": "boolean",
 					"default": false,
-					"description": "Flag to enable jdk preview features for notebooks"
+					"description": "%jdk.notebook.enablePreview.description%"
 				},
 				"jdk.notebook.implicitImports": {
 					"type": "array",
@@ -282,12 +282,12 @@
 						"java.io.*",
 						"java.math.*"
 					],
-					"description": "list of packages to import implicitly."
+					"description": "%jdk.notebook.implicitImports.description%"
 				},
 				"jdk.notebook.projects.mapping": {
 					"type": "object",
 					"default": {},
-					"description": "Mapping of notebook to project context"
+					"description": "%jdk.notebook.projects.mapping.description%"
 				},
 				"jdk.telemetry.enabled": {
 					"type": "boolean",
