@@ -96,6 +96,17 @@ const createTelemetryConfig = () => {
   console.log("Telemetry config generated successfully.");
 }
 
+const clearOutDir = () => {
+  const dir = path.join(__dirname, 'out');
+
+  if (fs.existsSync(dir)) {
+    fs.rmSync(dir, { recursive: true, force: true });
+    console.log(`Deleted: ${dir}`);
+  } else {
+    console.log(`No 'out' directory found.`);
+  }
+}
+
 (async () => {
   const args = process.argv.slice(2);
   try {
@@ -109,6 +120,8 @@ const createTelemetryConfig = () => {
       console.log("[watch] build finished");
     } else if (args.includes("--artifactory-check")) {
       checkAritfactoryUrl();
+    } else if (args.includes("--clear-out-dir")) {
+      clearOutDir();
     } else {
       // Build source code
       createTelemetryConfig();

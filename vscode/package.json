@@ -909,6 +909,7 @@
 		"compile": "tsc -p ./ && node ./esbuild.js",
 		"watch": "tsc -watch -p ./ | node ./esbuild.js --watch",
 		"test:unit": "npm run compile && node ./out/test/unit/runTest.js",
+		"test:perf": "node ./esbuild.js --clear-out-dir && npm run compile && node ./out/test/performance/runTest.js",
 		"test:coverage": "nyc --require ts-node/register npm run test:unit",
 		"test": "npm run compile && node ./out/test/integration/runTest.js",
 		"nbcode": "node ./out/test/launchNbcode.js",

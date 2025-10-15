@@ -19,7 +19,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { runTestSuite } from '../../testutils';
+import { runTestSuite } from '../../../integration/testutils';
 
 export function run(): Promise<void> {
 	return runTestSuite(__dirname);
