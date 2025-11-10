@@ -1,0 +1,2 @@
+-+org.netbeans.modules.properties
+-+org.netbeans.modules.xml.jaxb.api

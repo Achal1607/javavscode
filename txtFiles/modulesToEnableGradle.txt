@@ -1,0 +1,5 @@
+org.netbeans.modules.gradle.test
+org.netbeans.modules.gradle.editor
+org.netbeans.modules.gradle.persistence
+org.netbeans.modules.gradle.dists
+org.netbeans.modules.gradle.java

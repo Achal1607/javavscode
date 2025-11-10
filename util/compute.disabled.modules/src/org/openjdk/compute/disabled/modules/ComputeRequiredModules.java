@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,13 +58,28 @@ public class ComputeRequiredModules implements ArgsProcessor {
                     "org.netbeans.modules.editor.bookmarks",
                     "org.netbeans.modules.editor.macros",
                     "org.netbeans.modules.autoupdate.ui",
-                    // 58.8 MB
-                    // Tests modules
-                    "org.netbeans.modules.junit.ui",
-                    "org.netbeans.modules.testng.ui",
                     // Debug issue
                     "org.netbeans.modules.masterfs.nio2",
-                    "org.netbeans.modules.masterfs.ui"
+                    "org.netbeans.modules.masterfs.ui",
+                    // 65.82 MB
+                    // JavaDoc 
+                    "org.netbeans.modules.javadoc",
+                    // 73.58 MB
+                    // Graal and micronaut
+                    "org.netbeans.modules.micronaut",
+                    "org.netbeans.libs.graalsdk.system",
+                    "org.netbeans.libs.graaljs",
+                    // Others
+                    "org.netbeans.modules.java.debug",
+                    "org.netbeans.modules.java.hints.declarative",
+                    "org.netbeans.modules.java.disco",
+                    "org.netbeans.modules.java.mx.project",
+                    // 76.13 MB
+                    "org.netbeans.libs.jna",
+                    "org.netbeans.libs.jna.platform",
+                    "org.netbeans.modules.progress.ui",
+                    "org.netbeans.modules.properties",
+                    "org.netbeans.modules.java.openjdk.project"
                 };
                 String[] rootModulesMaven = {
                     "org.netbeans.modules.maven.hints",
@@ -79,7 +95,15 @@ public class ComputeRequiredModules implements ArgsProcessor {
                     "org.netbeans.api.maven",
                     "org.netbeans.modules.maven.persistence",
                     "org.netbeans.modules.maven",
-                    "org.netbeans.modules.maven.htmlui"
+                    "org.netbeans.modules.maven.htmlui",
+                    "org.netbeans.modules.maven.refactoring",
+                    "org.netbeans.modules.editor.tools.storage",
+                    "org.netbeans.modules.java.source.ant",
+                    // Tests modules
+                    "org.netbeans.modules.junit.ui",
+                    "org.netbeans.modules.testng.ui",
+                    "org.netbeans.libs.junit5",
+                    "org.netbeans.modules.nbjunit"
                 };
                 String[] rootModulesGradle = {
                     "org.netbeans.modules.gradle.java",
@@ -108,6 +132,8 @@ public class ComputeRequiredModules implements ArgsProcessor {
                 Map<String, ModuleInfo> allDependencies = getAllDependencies();
                 String disabledModules = allDependencies.keySet().stream().filter(cnbb -> !liteDependencies.contains(cnbb)).collect(Collectors.joining(","));
                 createAndWriteToFile(disabledModules, "modulesToBeDisabledLite");
+                String totalDisabledModules = allDependencies.keySet().stream().filter(cnbb -> !liteDependencies.contains(cnbb) && !mavenDependencies.contains(cnbb) && !gradleDependencies.contains(cnbb)).collect(Collectors.joining("\n"));
+                createAndWriteToFile(totalDisabledModules, "overallDisabledModules");
                 updateDisabledModulesList(disabledModules);
 
             } catch (IOException ex) {
@@ -134,10 +160,12 @@ public class ComputeRequiredModules implements ArgsProcessor {
 
     private void createAndWriteToFile(String content, String fileName) {
         try {
-            String filePath = "/tmp/" + fileName + ".txt";
-            File liteFile = new File(filePath);
-            liteFile.createNewFile();
-            FileWriter myWriter = new FileWriter(filePath);
+            Path currentDirectoryPath = Paths.get(System.getProperty("user.dir"));
+            Path baseDir = currentDirectoryPath.getParent().getParent();
+            Path filePath = baseDir.resolve("txtFiles").resolve(fileName + ".txt");
+            Files.deleteIfExists(filePath);
+            Files.createFile(filePath);
+            FileWriter myWriter = new FileWriter(filePath.toString());
             myWriter.write(content);
             myWriter.close();
         } catch (IOException ex) {

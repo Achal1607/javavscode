@@ -41,8 +41,8 @@
 		"nbcode": "node ./out/nbcode.js",
 		"nbjavac": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install .*nbjavac.*",
 		"apisupport": "node ./out/nbcode.js -J-Dnetbeans.close=true --modules --install '(org.netbeans.libs.xerces|org.netbeans.modules.editor.structure|org.netbeans.modules.xml|org.netbeans.modules.xml.axi|org.netbeans.modules.xml.retriever|org.netbeans.modules.xml.schema.model|org.netbeans.modules.xml.tax|org.netbeans.modules.xml.text|org.netbeans.modules.ant.browsetask|.*apisupport.*|org.netbeans.modules.debugger.jpda.ant)' && node ./out/nbcode.js -J-Dnetbeans.close=true --modules --enable .*apisupport.ant",
-		"build-nbcode": "cd .. && chmod 744 ./buildScripts/buildModules.sh && ./buildScripts/./buildModules.sh /tmp/modulesToEnableMaven.txt maven-extension maven-extension/nbcode/",
-		"package": "chmod 744 ../buildScripts/packageExtension.sh && ../buildScripts/./packageExtension.sh oracle-maven 22.0.0"
+		"build-nbcode": "cd .. && ./buildScripts/./buildModules.sh /Users/atalati/vscode-extension/extension-pack/javavscode/txtFiles/modulesToEnableMaven.txt maven-extension maven-extension/nbcode/",
+		"package": "../buildScripts/./packageExtension.sh oracle-maven 22.0.0"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
