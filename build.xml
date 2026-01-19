@@ -89,6 +89,7 @@
             patches/upgrade-lsp4j.diff
             patches/updated-show-input-params.diff
             patches/java-notebooks.diff
+            patches/magic-command.diff
         </string>
         <filterchain>
             <tokenfilter delimoutput=" ">
