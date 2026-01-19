@@ -154,7 +154,7 @@ public class NotebookConfigs {
     }
 
     public String getJdkVersion() {
-        return System.getProperty("java.version").split("\\.")[0];
+        return System.getProperty("java.version").split("[\\.\\-]")[0];
     }
 
     public void notebookConfigsChangeListener(JsonObject settings) {

@@ -15,6 +15,7 @@
  */
 package org.netbeans.modules.nbcode.java.notebook;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -43,6 +45,7 @@ import org.netbeans.modules.java.lsp.server.notebook.NotebookCellExecutionProgre
 import org.netbeans.modules.java.lsp.server.notebook.NotebookCellExecutionProgressResultParams.Builder;
 import org.netbeans.modules.java.lsp.server.notebook.NotebookCellExecutionProgressResultParams.EXECUTION_STATUS;
 import org.netbeans.modules.java.lsp.server.protocol.NbCodeLanguageClient;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 
@@ -79,7 +82,10 @@ public class CodeEval {
     private final Map<String, RequestProcessor> codeExecMap = new ConcurrentHashMap<>();
     private final Map<String, List<CompletableFuture<Boolean>>> pendingTasks = new ConcurrentHashMap<>();
     private final Map<String, String> activeCellExecutionMapping = new ConcurrentHashMap<>();
-
+    // Define the pattern for @MavenGrab("g", "a", "v")
+    private static final Pattern MAVEN_GRAB_PATTERN = 
+        Pattern.compile("@MavenGrab\\s*\\(\\s*\"([^\"]+)\"\\s*,\\s*\"([^\"]+)\"\\s*,\\s*\"([^\"]+)\"\\s*\\)");
+    
     public static CodeEval getInstance() {
         return Singleton.instance;
     }
@@ -215,8 +221,9 @@ public class CodeEval {
 
     public void runCode(JShell jshell, String code, String notebookId) {
         try {
+            String cleanCode = processMavenGrab(jshell, code, notebookId);
             SourceCodeAnalysis analysis = jshell.sourceCodeAnalysis();
-            List<String> snippets = NotebookUtils.getCodeSnippets(analysis, code);
+            List<String> snippets = NotebookUtils.getCodeSnippets(analysis, cleanCode);
 
             for (String snippet : snippets) {
                 for (SnippetEvent event : jshell.eval(snippet)) {
@@ -234,6 +241,41 @@ public class CodeEval {
             LOG.log(Level.SEVERE, "Error while evaluation of the code : {0}", e.getMessage());
             throw new IllegalStateException(e);
         }
+    }
+    
+    private String processMavenGrab(JShell jshell, String code, String notebookId) {
+        Matcher matcher = MAVEN_GRAB_PATTERN.matcher(code);
+        StringBuffer sb = new StringBuffer();
+
+        while (matcher.find()) {
+            try {
+                String groupId = matcher.group(1);
+                String artifactId = matcher.group(2);
+                String version = matcher.group(3);
+                String coords = String.format("%s:%s:%s", groupId, artifactId, version);
+                
+                Consumer<String> progressCallback = (msg) -> {
+                    if (notebookId != null) {
+                        sendNotification(notebookId, msg.getBytes(), EXECUTION_STATUS.EXECUTING, false);
+                    }
+                };
+                
+                List<File> jars = MagicCommandHandler.handler(coords, progressCallback);
+                
+                for (File jar : jars) {
+                    jshell.addToClasspath(jar.getAbsolutePath());
+                    String msg = "Jar added to classpath: " + jar.getName() + "\n";
+                    sendNotification(notebookId, msg.getBytes(), EXECUTION_STATUS.EXECUTING, false);
+                }
+                
+                matcher.appendReplacement(sb, "");
+            } catch (Exception ex) {
+                LOG.severe(() -> "Some error occurred while downloading artifacts" + ex.getMessage());
+                sendNotification(notebookId, "Some error occurred while downloading artifacts".getBytes(), EXECUTION_STATUS.EXECUTING, true);
+            }
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 
     private RequestProcessor getCodeExec(String notebookId) {
