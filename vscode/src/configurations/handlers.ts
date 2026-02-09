@@ -95,6 +95,31 @@ export const lspServerVmOptionsHandler = (): string[] => {
     return serverVmOptions.map(el => `-J${el}`);
 }
 
+export const resolveMavenUserSettingsPath = (
+    configuredPath: string | null,
+    workspaceFolders?: readonly { uri: { fsPath: string } }[],
+    workspaceFileFsPath?: string
+): string | null => {
+    if (!configuredPath || !configuredPath.trim()) {
+        return null;
+    }
+
+    const trimmedPath = configuredPath.trim();
+    if (path.isAbsolute(trimmedPath)) {
+        return path.normalize(trimmedPath);
+    }
+
+    const resolvedWorkspaceFolders = workspaceFolders ?? workspace?.workspaceFolders;
+    const resolvedWorkspaceFileFsPath = workspaceFileFsPath ?? workspace?.workspaceFile?.fsPath;
+    const basePath = resolvedWorkspaceFolders?.[0]?.uri?.fsPath || (resolvedWorkspaceFileFsPath ? path.dirname(resolvedWorkspaceFileFsPath) : undefined);
+    return basePath ? path.normalize(path.resolve(basePath, trimmedPath)) : path.normalize(path.resolve(trimmedPath));
+}
+
+export const mavenUserSettingsValueHandler = (): string | null => {
+    const configuredPath = getConfigurationValue<string | null>(configKeys.mavenUserSettings, null);
+    return resolveMavenUserSettingsPath(configuredPath);
+}
+
 export const isDarkColorThemeHandler = (): boolean => {
     const themeName: string = getBuiltinConfigurationValue(builtInConfigKeys.vscodeTheme);
     if (!themeName) {

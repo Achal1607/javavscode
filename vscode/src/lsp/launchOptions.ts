@@ -14,7 +14,7 @@
   limitations under the License.
 */
 import { builtInConfigKeys, configKeys } from "../configurations/configuration"
-import { isDarkColorThemeHandler, isNetbeansVerboseEnabled, jdkHomeValueHandler, projectJdkHomeValueHandler, lspServerVmOptionsHandler, projectSearchRootsValueHandler, userdirHandler } from "../configurations/handlers";
+import { isDarkColorThemeHandler, isNetbeansVerboseEnabled, jdkHomeValueHandler, mavenUserSettingsValueHandler, projectJdkHomeValueHandler, lspServerVmOptionsHandler, projectSearchRootsValueHandler, userdirHandler } from "../configurations/handlers";
 import { l10n } from "../localiser";
 import { isString } from "../utils";
 import { userDefinedLaunchOptionsType } from "./types"
@@ -40,6 +40,10 @@ export const getUserConfigLaunchOptionsDefaults = (): userDefinedLaunchOptionsTy
         [configKeys.verbose]: {
             value: isNetbeansVerboseEnabled(),
             optionToPass: '-J-Dnetbeans.logger.console='
+        },
+        [configKeys.mavenUserSettings]: {
+            value: mavenUserSettingsValueHandler(),
+            optionToPass: '-J-Dnetbeans.lsp.maven.userSettings='
         },
         [builtInConfigKeys.vscodeTheme]: {
             value: isDarkColorThemeHandler() ? 'com.formdev.flatlaf.FlatDarkLaf' : null,

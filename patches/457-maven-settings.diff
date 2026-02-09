@@ -1,0 +1,220 @@
+diff --git a/java/maven.embedder/src/org/netbeans/modules/maven/embedder/MavenEmbedder.java b/java/maven.embedder/src/org/netbeans/modules/maven/embedder/MavenEmbedder.java
+index ff021ac6f7..a42a1f03a9 100644
+--- a/java/maven.embedder/src/org/netbeans/modules/maven/embedder/MavenEmbedder.java
++++ b/java/maven.embedder/src/org/netbeans/modules/maven/embedder/MavenEmbedder.java
+@@ -117,6 +117,7 @@ import org.netbeans.modules.maven.embedder.impl.NbVersionResolver2;
+ public final class MavenEmbedder {
+ 
+     private static final Logger LOG = Logger.getLogger(MavenEmbedder.class.getName());
++    private static final String LSP_MAVEN_USER_SETTINGS_PROPERTY = "netbeans.lsp.maven.userSettings"; // NOI18N
+     private final PlexusContainer plexus;
+     private final DefaultMaven maven;
+     private final ProjectBuilder projectBuilder;
+@@ -200,7 +201,8 @@ public final class MavenEmbedder {
+             return testSettings; // could instead make public void setSettings(Settings settingsOverride)
+         }
+         File settingsXml = embedderConfiguration.getSettingsXml();
+-        long newSettingsTimestamp = settingsXml.hashCode() ^ settingsXml.lastModified() ^ SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE.lastModified();
++        File userSettingsFile = getUserSettingsFile();
++        long newSettingsTimestamp = settingsXml.hashCode() ^ settingsXml.lastModified() ^ userSettingsFile.lastModified();
+         // could be included but currently constant: hashCode() of those files; getSystemProperties.hashCode()
+         if (settings != null && settingsTimestamp == newSettingsTimestamp) {
+             LOG.log(Level.FINER, "settings.xml cache hit for {0}", this);
+@@ -209,7 +211,7 @@ public final class MavenEmbedder {
+         LOG.log(Level.FINE, "settings.xml cache miss for {0}", this);
+         SettingsBuildingRequest req = new DefaultSettingsBuildingRequest();
+         req.setGlobalSettingsFile(settingsXml);
+-        req.setUserSettingsFile(SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE);
++        req.setUserSettingsFile(userSettingsFile);
+         req.setSystemProperties(getSystemProperties());
+         req.setUserProperties(embedderConfiguration.getUserProperties());
+         try {
+@@ -587,8 +589,9 @@ public final class MavenEmbedder {
+         if (settingsXml !=null && settingsXml.exists()) {
+             req.setGlobalSettingsFile(settingsXml);
+         }
+-        if (SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE != null && SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE.exists()) {
+-          req.setUserSettingsFile(SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE);
++        File userSettingsFile = getUserSettingsFile();
++        if (userSettingsFile != null && userSettingsFile.exists()) {
++          req.setUserSettingsFile(userSettingsFile);
+         }
+         
+         req.setSystemProperties(getSystemProperties());
+@@ -609,6 +612,14 @@ public final class MavenEmbedder {
+ 
+         return req;
+     }
++
++    private static File getUserSettingsFile() {
++        String configuredSettingsPath = System.getProperty(LSP_MAVEN_USER_SETTINGS_PROPERTY);
++        if (configuredSettingsPath != null && !configuredSettingsPath.isBlank()) {
++            return FileUtil.normalizeFile(new File(configuredSettingsPath.trim()));
++        }
++        return SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE;
++    }
+     
+     /**
+      * Do not keep the reference to the session. Plexus will hopefully keep it for us.
+diff --git a/java/maven.embedder/test/unit/src/org/netbeans/modules/maven/embedder/EmbedderFactoryTest.java b/java/maven.embedder/test/unit/src/org/netbeans/modules/maven/embedder/EmbedderFactoryTest.java
+index 5c76a053fe..aa15b02c22 100644
+--- a/java/maven.embedder/test/unit/src/org/netbeans/modules/maven/embedder/EmbedderFactoryTest.java
++++ b/java/maven.embedder/test/unit/src/org/netbeans/modules/maven/embedder/EmbedderFactoryTest.java
+@@ -178,4 +178,21 @@ public class EmbedderFactoryTest extends NbTestCase {
+         assertEquals("you", props.get("me"));
+     }
+ 
++    public void testCustomUserSettingsPropertyIsUsedInExecutionRequest() throws Exception {
++        String original = System.getProperty("netbeans.lsp.maven.userSettings");
++        File customSettingsFile = new File(getWorkDir(), "custom-settings.xml");
++        try {
++            TestFileUtils.writeFile(customSettingsFile, "<settings/>");
++            System.setProperty("netbeans.lsp.maven.userSettings", customSettingsFile.getAbsolutePath());
++            MavenExecutionRequest req = EmbedderFactory.getProjectEmbedder().createMavenExecutionRequest();
++            assertEquals(customSettingsFile.getAbsoluteFile(), req.getUserSettingsFile().getAbsoluteFile());
++        } finally {
++            if (original != null) {
++                System.setProperty("netbeans.lsp.maven.userSettings", original);
++            } else {
++                System.clearProperty("netbeans.lsp.maven.userSettings");
++            }
++        }
++    }
++
+ }
+diff --git a/java/maven/src/org/netbeans/modules/maven/api/FileUtilities.java b/java/maven/src/org/netbeans/modules/maven/api/FileUtilities.java
+index aa893d58ae..9fefbfd3d3 100644
+--- a/java/maven/src/org/netbeans/modules/maven/api/FileUtilities.java
++++ b/java/maven/src/org/netbeans/modules/maven/api/FileUtilities.java
+@@ -28,7 +28,6 @@ import java.util.Stack;
+ import java.util.TreeSet;
+ import java.util.regex.Pattern;
+ import org.apache.maven.artifact.Artifact;
+-import org.apache.maven.cli.configuration.SettingsXmlConfigurationProcessor;
+ import org.netbeans.api.annotations.common.CheckForNull;
+ import org.netbeans.api.annotations.common.NonNull;
+ import org.netbeans.api.annotations.common.NullAllowed;
+@@ -50,6 +49,7 @@ import org.openide.util.Utilities;
+  * @author  Milos Kleint
+  */
+ public final class FileUtilities {
++    private static final String LSP_MAVEN_USER_SETTINGS_PROPERTY = "netbeans.lsp.maven.userSettings"; // NOI18N
+     
+     /** Creates a new instance of FileUtilities */
+     private FileUtilities() {
+@@ -291,13 +291,14 @@ public final class FileUtilities {
+      * @return either the settings.xml file or <code>null</code> if not available
+      */
+     public static File getUserSettingsFile(boolean forceCreate) {
+-        if(!SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE.exists()) {
++        File userSettingsFile = getConfiguredUserSettingsFile();
++        if (!userSettingsFile.exists()) {
+             if(!forceCreate) {
+                 return null;
+             }
+             
+             try {
+-                File fil = SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE.getParentFile();
++                File fil = userSettingsFile.getParentFile();
+ 
+                 DataFolder folder = DataFolder.findFolder(FileUtil.createFolder(fil));
+                 // path to template...
+@@ -310,7 +311,15 @@ public final class FileUtilities {
+                 ex.printStackTrace();
+             }
+         }
+-        return SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE;
++        return userSettingsFile;
++    }
++
++    private static File getConfiguredUserSettingsFile() {
++        String configuredSettingsPath = System.getProperty(LSP_MAVEN_USER_SETTINGS_PROPERTY);
++        if (configuredSettingsPath != null && !configuredSettingsPath.isBlank()) {
++            return FileUtil.normalizeFile(new File(configuredSettingsPath.trim()));
++        }
++        return FileUtil.normalizeFile(new File(new File(System.getProperty("user.home")), ".m2/settings.xml")); // NOI18N
+     }
+     
+     private static void getSourcePackageNames (Project prj, SortedSet<String> result, boolean onlyRoots) {
+diff --git a/java/maven/src/org/netbeans/modules/maven/execute/MavenCommandLineExecutor.java b/java/maven/src/org/netbeans/modules/maven/execute/MavenCommandLineExecutor.java
+index 81a7feb329..c9aa64eefe 100644
+--- a/java/maven/src/org/netbeans/modules/maven/execute/MavenCommandLineExecutor.java
++++ b/java/maven/src/org/netbeans/modules/maven/execute/MavenCommandLineExecutor.java
+@@ -119,6 +119,7 @@ public class MavenCommandLineExecutor extends AbstractMavenExecutor {
+     static final String ENV_PREFIX = MavenExecuteUtils.ENV_PREFIX;
+     static final String INTERNAL_PREFIX = "NbIde."; //NOI18N
+     static final String ENV_JAVAHOME = ENV_PREFIX + "JAVA_HOME"; //NOI18N
++    private static final String LSP_MAVEN_USER_SETTINGS_PROPERTY = "netbeans.lsp.maven.userSettings"; // NOI18N
+ 
+     private static final String KEY_UUID = "NB_EXEC_MAVEN_PROCESS_UUID"; //NOI18N
+ 
+@@ -128,6 +129,7 @@ public class MavenCommandLineExecutor extends AbstractMavenExecutor {
+     private String processUUID;
+     private Process preProcess;
+     private String preProcessUUID;
++    
+     private static final SpecificationVersion VER18 = new SpecificationVersion("1.8"); //NOI18N
+     private static final Logger LOGGER = Logger.getLogger(MavenCommandLineExecutor.class.getName());
+ 
+@@ -531,6 +533,12 @@ public class MavenCommandLineExecutor extends AbstractMavenExecutor {
+         if (o instanceof String) {
+             toRet.add("--settings");
+             toRet.add(o.toString());
++        } else {
++            String configuredUserSettings = getConfiguredUserSettingsPath();
++            if (configuredUserSettings != null) {
++                toRet.add("--settings");
++                toRet.add(configuredUserSettings);
++            }
+         }
+         String opts = MavenSettings.getDefault().getDefaultOptions();
+         if (opts != null) {
+@@ -579,6 +587,14 @@ public class MavenCommandLineExecutor extends AbstractMavenExecutor {
+         toRet.addAll(config.getGoals());
+         return toRet;
+     }
++
++    private static String getConfiguredUserSettingsPath() {
++        String configuredSettingsPath = System.getProperty(LSP_MAVEN_USER_SETTINGS_PROPERTY);
++        if (configuredSettingsPath != null && !configuredSettingsPath.isBlank()) {
++            return FileUtil.normalizeFile(new File(configuredSettingsPath.trim())).getAbsolutePath();
++        }
++        return null;
++    }
+    
+     /**
+      * Quotes the parameter string using apostrohphes. As Maven does not understand \' escape in quoted string, work around by terminating single-quote
+diff --git a/java/maven/src/org/netbeans/modules/maven/nodes/ProjectFilesNode.java b/java/maven/src/org/netbeans/modules/maven/nodes/ProjectFilesNode.java
+index 63227327bc..4d355b4bd9 100644
+--- a/java/maven/src/org/netbeans/modules/maven/nodes/ProjectFilesNode.java
++++ b/java/maven/src/org/netbeans/modules/maven/nodes/ProjectFilesNode.java
+@@ -34,7 +34,6 @@ import java.util.logging.Level;
+ import java.util.logging.Logger;
+ import javax.swing.AbstractAction;
+ import javax.swing.Action;
+-import org.apache.maven.cli.configuration.SettingsXmlConfigurationProcessor;
+ import org.netbeans.api.annotations.common.StaticResource;
+ import org.netbeans.modules.maven.M2AuxilaryConfigImpl;
+ import org.netbeans.modules.maven.NbMavenProjectImpl;
+@@ -78,7 +77,8 @@ public class ProjectFilesNode extends AnnotatedAbstractNode {
+     @Override
+     public Action[] getActions(boolean context) {
+         Collection<Action> col = new ArrayList<Action>();
+-        if (!SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE.exists()) {
++        File userSettingsFile = FileUtilities.getUserSettingsFile(false);
++        if (userSettingsFile == null || !userSettingsFile.exists()) {
+             col.add(new AddSettingsXmlAction());
+         }
+         return col.toArray(new Action[0]);
+@@ -163,7 +163,10 @@ public class ProjectFilesNode extends AnnotatedAbstractNode {
+                 }
+             }
+             keys.add(d.getFileObject(M2AuxilaryConfigImpl.CONFIG_FILE_NAME));
+-            keys.add(FileUtil.toFileObject(SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE));
++            File userSettingsFile = FileUtilities.getUserSettingsFile(false);
++            if (userSettingsFile != null) {
++                keys.add(FileUtil.toFileObject(userSettingsFile));
++            }
+             keys.removeAll(Collections.singleton(null));
+             return true;
+         }

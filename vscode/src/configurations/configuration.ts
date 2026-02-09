@@ -29,6 +29,7 @@ export const configKeys = {
     runConfigCwd: 'runConfig.cwd',
     runConfigEnv: 'runConfig.env',
     verbose: 'verbose',
+    mavenUserSettings: 'maven.settings',
     userdir: 'userdir',
     revealInActivteProj: "revealActiveInProjects",
     notebookClasspath: "notebook.classpath",
@@ -49,6 +50,7 @@ export const userConfigsListened: string[] = [
     appendPrefixToCommand(configKeys.jdkHome),
     appendPrefixToCommand(configKeys.userdir),
     appendPrefixToCommand(configKeys.lspVmOptions),
+    appendPrefixToCommand(configKeys.mavenUserSettings),
     appendPrefixToCommand(configKeys.disableNbJavac),
     appendPrefixToCommand(configKeys.disableProjSearchLimit),
     appendPrefixToCommand(configKeys.notebookClasspath),
@@ -70,4 +72,3 @@ export const userConfigsListenedByServer = [
     appendPrefixToCommand(configKeys.runConfigVmOptions),
     appendPrefixToCommand(configKeys.runConfigCwd)
 ];
-

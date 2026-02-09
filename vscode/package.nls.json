@@ -48,6 +48,7 @@
     "jdk.configuration.arguments.description": "Arguments",
     "jdk.configuration.vmOptions.description": "VM options",
     "jdk.configuration.serverVmOptions.description": "Specifies extra VM arguments used to launch the Java Language Server",
+    "jdk.configuration.maven.settings.description": "Path to a Maven settings.xml file used by Maven project loading and execution. Relative paths are resolved from the first workspace folder.",
     "jdk.configuration.runConfig.env.description": "Environment variables",
     "jdk.configuration.runConfig.cwd.description": "Working directory",
     "jdk.configuration.disableNbJavac.description": "Advanced option: disable nb-javac library, javac from the selected JDK will be used. The selected JDK must be at least JDK 25.",

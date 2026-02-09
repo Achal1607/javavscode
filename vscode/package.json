@@ -229,6 +229,14 @@
 					"description": "%jdk.configuration.serverVmOptions.description%",
 					"scope": "machine-overridable"
 				},
+				"jdk.maven.settings": {
+					"type": [
+						"string",
+						"null"
+					],
+					"default": null,
+					"description": "%jdk.configuration.maven.settings.description%"
+				},
 				"jdk.runConfig.env": {
 					"type": "string",
 					"default": "",

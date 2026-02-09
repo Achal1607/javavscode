@@ -48,6 +48,7 @@
     "jdk.configuration.arguments.description": "引数",
     "jdk.configuration.vmOptions.description": "VMオプション",
     "jdk.configuration.serverVmOptions.description": "Java言語サーバーの起動に使用されるその他のVM引数を指定します",
+    "jdk.configuration.maven.settings.description": "Mavenプロジェクトのロードおよび実行で使用するMaven settings.xmlファイルへのパス。相対パスは最初のワークスペース・フォルダから解決されます。",
     "jdk.configuration.runConfig.env.description": "環境変数",
     "jdk.configuration.runConfig.cwd.description": "作業ディレクトリ",
     "jdk.configuration.disableNbJavac.description": "拡張オプション: nb-javacライブラリを無効化すると、選択したJDKからのjavacが使用されます。選択したJDKは少なくともJDK 25である必要があります。",
