@@ -20,6 +20,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -89,6 +96,74 @@ public class NotebookUtils {
 
     public static boolean checkEmptyString(String input) {
         return (input == null || input.trim().isEmpty());
+    }
+
+    public static List<String> expandGlobPaths(List<String> entries) {
+        if (entries == null || entries.isEmpty()) {
+            return entries;
+        }
+        List<String> expanded = new ArrayList<>();
+        for (String entry : entries) {
+            if (checkEmptyString(entry)) {
+                continue;
+            }
+            Path entryPath;
+            try {
+                entryPath = Paths.get(entry);
+            } catch (InvalidPathException ex) {
+                expanded.add(entry);
+                continue;
+            }
+            if (Files.exists(entryPath)) {
+                expanded.add(entry);
+                continue;
+            }
+            List<String> matches = expandGlobEntry(entry, entryPath);
+            if (matches.isEmpty()) {
+                expanded.add(entry);
+            } else {
+                expanded.addAll(matches);
+            }
+        }
+        return expanded;
+    }
+
+    private static List<String> expandGlobEntry(String pattern, Path entryPath) {
+        List<String> matches = new ArrayList<>();
+        Path root = findExistingRoot(entryPath);
+        if (root == null) {
+            return matches;
+        }
+        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+        boolean absolutePattern = entryPath.isAbsolute();
+        try {
+            Files.walk(root)
+                    .filter(path -> {
+                        Path matchPath = absolutePattern ? path : root.relativize(path);
+                        return matcher.matches(matchPath);
+                    })
+                    .forEach(path -> matches.add(path.toString()));
+        } catch (IOException ex) {
+            return matches;
+        }
+        return matches;
+    }
+
+    private static Path findExistingRoot(Path path) {
+        Path current = path;
+        while (current != null && !Files.exists(current)) {
+            current = current.getParent();
+        }
+        if (current == null) {
+            return null;
+        }
+        try {
+            return current.toRealPath();
+        } catch (InvalidPathException ex) {
+            return null;
+        } catch (IOException ex) {
+            return current.toAbsolutePath();
+        }
     }
 
     @SuppressWarnings("unchecked")

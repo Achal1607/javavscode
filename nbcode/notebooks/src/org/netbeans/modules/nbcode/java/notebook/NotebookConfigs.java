@@ -127,14 +127,20 @@ public class NotebookConfigs {
                 if (c != null) {
                     JsonArray classPathConfig = NotebookUtils.getArgument(c, 0, JsonArray.class);
                     if (classPathConfig != null) {
-                        classPath = String.join(File.pathSeparator,classPathConfig.asList().stream().map((elem) -> elem.getAsString()).toList());
+                        List<String> classPathEntries = classPathConfig.asList().stream()
+                                .map(elem -> elem.getAsString())
+                                .toList();
+                        classPath = String.join(File.pathSeparator, NotebookUtils.expandGlobPaths(classPathEntries));
                     } else {
                         classPath = null;
                     }
                     
                     JsonArray modulePathConfig = NotebookUtils.getArgument(c, 1, JsonArray.class);
                     if (modulePathConfig != null) {
-                        modulePath = String.join(File.pathSeparator,modulePathConfig.asList().stream().map((elem) -> elem.getAsString()).toList());
+                        List<String> modulePathEntries = modulePathConfig.asList().stream()
+                                .map(elem -> elem.getAsString())
+                                .toList();
+                        modulePath = String.join(File.pathSeparator, NotebookUtils.expandGlobPaths(modulePathEntries));
                     } else {
                         modulePath = null;
                     }

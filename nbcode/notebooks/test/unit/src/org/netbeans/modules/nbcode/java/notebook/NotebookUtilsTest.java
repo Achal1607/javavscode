@@ -1,5 +1,8 @@
 package org.netbeans.modules.nbcode.java.notebook;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import org.eclipse.lsp4j.Position;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -117,6 +120,25 @@ public class NotebookUtilsTest {
         assertEquals("abc\n def \nghi jkl\nm\n", NotebookUtils.applyChange(multiLine, new Position(3, 0), new Position(3, 0), "m\r\n"));
         assertEquals("abc\n xyz\ndef \nghi\njkl\n", NotebookUtils.applyChange(multiLine, new Position(1, 1), new Position(2, 4), "xyz\ndef \nghi\n"));
         assertEquals("abc\n def \nghi jkl\nmo", NotebookUtils.applyChange(multiLine + "mno", new Position(3, 1), new Position(3, 2), ""));
+    }
+
+    @Test
+    public void testExpandGlobPaths() throws Exception {
+        Path tempDir = Files.createTempDirectory("notebook-utils");
+        Path libsDir = Files.createDirectories(tempDir.resolve("lib"));
+        Path jarOne = Files.createFile(libsDir.resolve("one.jar"));
+        Path jarTwo = Files.createFile(libsDir.resolve("two.jar"));
+        Files.createFile(libsDir.resolve("readme.txt"));
+
+        String jarPattern = libsDir.resolve("*.jar").toString();
+        String missingPattern = tempDir.resolve("missing").resolve("*.jar").toString();
+
+        List<String> expanded = NotebookUtils.expandGlobPaths(List.of(jarPattern, "plain/path", missingPattern));
+
+        assertTrue(expanded.contains(jarOne.toString()));
+        assertTrue(expanded.contains(jarTwo.toString()));
+        assertTrue(expanded.contains("plain/path"));
+        assertTrue(expanded.contains(missingPattern));
     }
     
 }

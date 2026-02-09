@@ -21,10 +21,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import org.eclipse.lsp4j.ConfigurationItem;
 import org.eclipse.lsp4j.ConfigurationParams;
 import org.junit.After;
@@ -232,6 +236,40 @@ public class NotebookConfigsTest {
             
         } catch (Exception ex) {
             fail("Configuration with quoted spaces failed");
+        }
+    }
+
+    @Test
+    public void testGlobExpansionForNotebookPaths() {
+        try {
+            Path tempDir = Files.createTempDirectory("notebook-configs");
+            Path libsDir = Files.createDirectories(tempDir.resolve("lib"));
+            Path jarOne = Files.createFile(libsDir.resolve("one.jar"));
+            Path jarTwo = Files.createFile(libsDir.resolve("two.jar"));
+            Files.createFile(libsDir.resolve("readme.txt"));
+
+            JsonArray classpath = new JsonArray();
+            classpath.add(new JsonPrimitive(libsDir.resolve("*.jar").toString()));
+            updateConfigValue(CLASSPATH_KEY, classpath);
+
+            Path modulesDir = Files.createDirectories(tempDir.resolve("modules"));
+            Path moduleOne = Files.createDirectories(modulesDir.resolve("module.one"));
+            JsonArray modulepath = new JsonArray();
+            modulepath.add(new JsonPrimitive(modulesDir.resolve("*").toString()));
+            updateConfigValue(MODULEPATH_KEY, modulepath);
+
+            instance.getInitialized().get(5, TimeUnit.SECONDS);
+
+            List<String> classpathEntries = Arrays.asList(
+                    instance.getClassPath().split(Pattern.quote(File.pathSeparator)));
+            assertTrue(classpathEntries.contains(jarOne.toString()));
+            assertTrue(classpathEntries.contains(jarTwo.toString()));
+
+            List<String> modulepathEntries = Arrays.asList(
+                    instance.getModulePath().split(Pattern.quote(File.pathSeparator)));
+            assertTrue(modulepathEntries.contains(moduleOne.toString()));
+        } catch (Exception ex) {
+            fail("Configuration initialization failed");
         }
     }
     
