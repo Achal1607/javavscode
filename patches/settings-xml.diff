@@ -1,0 +1,163 @@
+--- a/java/maven.embedder/src/org/netbeans/modules/maven/embedder/EmbedderConfiguration.java
++++ b/java/maven.embedder/src/org/netbeans/modules/maven/embedder/EmbedderConfiguration.java
+@@ -27,7 +27,7 @@
+  *
+  * @author mkleint
+  */
+-record EmbedderConfiguration(PlexusContainer container, Properties systemProps, Properties userProps, boolean offline, File settingsXml) {
++record EmbedderConfiguration(PlexusContainer container, Properties systemProps, Properties userProps, boolean offline, File settingsXml, File userSettingsXml) {
+ 
+     Properties getSystemProperties() {
+         return systemProps();
+@@ -49,4 +49,8 @@
+         return settingsXml();
+     }
+ 
++    File getUserSettingsXml() {
++        return userSettingsXml();
+ }
++
++}
+--- a/java/maven.embedder/src/org/netbeans/modules/maven/embedder/EmbedderFactory.java
++++ b/java/maven.embedder/src/org/netbeans/modules/maven/embedder/EmbedderFactory.java
+@@ -25,6 +25,7 @@
+ import java.util.logging.Level;
+ import java.util.logging.Logger;
+ import java.util.prefs.Preferences;
++import org.apache.maven.cli.configuration.SettingsXmlConfigurationProcessor;
+ import org.apache.maven.artifact.repository.ArtifactRepository;
+ import org.apache.maven.model.Model;
+ import org.apache.maven.model.building.*;
+@@ -60,6 +61,7 @@
+     
+     //same prop constant in MavenSettings.java
+     static final String PROP_DEFAULT_OPTIONS = "defaultOptions"; 
++    static final String PROP_USER_SETTINGS_XML = "userSettingsXml";
+     private static final Set<String> forbidden = Set.of(
+         "netbeans.logger.console", //NOI18N
+         "java.util.logging.config.class", //NOI18N
+@@ -256,6 +258,18 @@
+         return new File(getEffectiveMavenHome(), "conf/settings.xml");
+     }
+ 
++    public static String getUserSettingsXml() {
++        return getPreferences().get(PROP_USER_SETTINGS_XML, "");
++    }
++
++    private static File getUserSettingsXmlFile() {
++        String userSettingsXml = getUserSettingsXml().trim();
++        if (userSettingsXml.isEmpty()) {
++            return SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE;
++        }
++        return FileUtil.normalizeFile(new File(userSettingsXml));
++    }
++
+     /**
+      * #191267: suppresses logging from embedded Maven, since interesting results normally appear elsewhere.
+      */
+@@ -322,7 +336,7 @@
+ 
+         Properties userprops = new Properties();
+         userprops.putAll(getCustomGlobalUserProperties());
+-        EmbedderConfiguration configuration = new EmbedderConfiguration(pc, cloneStaticProps(), userprops, true, getSettingsXml());
++        EmbedderConfiguration configuration = new EmbedderConfiguration(pc, cloneStaticProps(), userprops, true, getSettingsXml(), getUserSettingsXmlFile());
+         
+         try {
+             return new MavenEmbedder(configuration);
+@@ -425,7 +439,7 @@
+ 
+         Properties userprops = new Properties();
+         userprops.putAll(getCustomGlobalUserProperties());
+-        EmbedderConfiguration req = new EmbedderConfiguration(pc, cloneStaticProps(), userprops, false, getSettingsXml());
++        EmbedderConfiguration req = new EmbedderConfiguration(pc, cloneStaticProps(), userprops, false, getSettingsXml(), getUserSettingsXmlFile());
+ 
+ //        //TODO remove explicit activation
+ //        req.addActiveProfile("netbeans-public").addActiveProfile("netbeans-private"); //NOI18N
+--- a/java/maven.embedder/src/org/netbeans/modules/maven/embedder/MavenEmbedder.java
++++ b/java/maven.embedder/src/org/netbeans/modules/maven/embedder/MavenEmbedder.java
+@@ -200,7 +200,11 @@
+             return testSettings; // could instead make public void setSettings(Settings settingsOverride)
+         }
+         File settingsXml = embedderConfiguration.getSettingsXml();
+-        long newSettingsTimestamp = settingsXml.hashCode() ^ settingsXml.lastModified() ^ SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE.lastModified();
++        File userSettingsXml = embedderConfiguration.getUserSettingsXml();
++        long newSettingsTimestamp = settingsXml.hashCode() ^ settingsXml.lastModified();
++        if (userSettingsXml != null) {
++            newSettingsTimestamp ^= userSettingsXml.hashCode() ^ userSettingsXml.lastModified();
++        }
+         // could be included but currently constant: hashCode() of those files; getSystemProperties.hashCode()
+         if (settings != null && settingsTimestamp == newSettingsTimestamp) {
+             LOG.log(Level.FINER, "settings.xml cache hit for {0}", this);
+@@ -209,7 +213,7 @@
+         LOG.log(Level.FINE, "settings.xml cache miss for {0}", this);
+         SettingsBuildingRequest req = new DefaultSettingsBuildingRequest();
+         req.setGlobalSettingsFile(settingsXml);
+-        req.setUserSettingsFile(SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE);
++        req.setUserSettingsFile(userSettingsXml);
+         req.setSystemProperties(getSystemProperties());
+         req.setUserProperties(embedderConfiguration.getUserProperties());
+         try {
+@@ -587,8 +591,9 @@
+         if (settingsXml !=null && settingsXml.exists()) {
+             req.setGlobalSettingsFile(settingsXml);
+         }
+-        if (SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE != null && SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE.exists()) {
+-          req.setUserSettingsFile(SettingsXmlConfigurationProcessor.DEFAULT_USER_SETTINGS_FILE);
++        File userSettingsXml = embedderConfiguration.getUserSettingsXml();
++        if (userSettingsXml != null && userSettingsXml.exists()) {
++          req.setUserSettingsFile(userSettingsXml);
+         }
+         
+         req.setSystemProperties(getSystemProperties());
+--- a/java/maven/src/org/netbeans/modules/maven/options/MavenSettings.java
++++ b/java/maven/src/org/netbeans/modules/maven/options/MavenSettings.java
+@@ -77,6 +77,7 @@
+     private static final String PROP_VM_OPTIONS_WRAP = "vmOptionsWrap";
+     private static final String PROP_DEFAULT_JDK = "defaultJdk";
+     private static final String PROP_PREFER_WRAPPER = "preferWrapper"; //NOI18N
++    private static final String PROP_USER_SETTINGS_XML = "userSettingsXml";
+ 
+     //these are from former versions (6.5) and are here only for conversion
+     private static final String PROP_DEBUG = "showDebug"; // NOI18N
+@@ -255,6 +256,27 @@
+         }        
+     }
+     
++    public String getUserSettingsXml() {
++        return EmbedderFactory.getUserSettingsXml();
++    }
++
++    public void setUserSettingsXml(String path) {
++      String normalized = path != null ? path.trim() : "";
++      String old = getPreferences().get(PROP_USER_SETTINGS_XML, "");
++
++      if (old.equals(normalized)) {
++          return;
++      }
++
++      if (normalized.isEmpty()) {
++          getPreferences().remove(PROP_USER_SETTINGS_XML);
++      } else {
++          getPreferences().put(PROP_USER_SETTINGS_XML, normalized);
++      }
++
++      EmbedderFactory.resetCachedEmbedders();
++  }
++
+     public boolean isVMOptionsWrap() {
+         return getPreferences().getBoolean(PROP_VM_OPTIONS_WRAP, true);
+     }
+--- a/java/maven/src/org/netbeans/modules/maven/execute/MavenCommandLineExecutor.java
++++ b/java/maven/src/org/netbeans/modules/maven/execute/MavenCommandLineExecutor.java
+@@ -531,6 +531,11 @@
+         if (config.isUpdateSnapshots()) {
+             toRet.add("--update-snapshots");//NOI18N
+         }
++        String userSettingsXml = MavenSettings.getDefault().getUserSettingsXml();
++        if (!userSettingsXml.isEmpty()) {
++            toRet.add("--settings");
++            toRet.add(userSettingsXml);
++        }
+         if (config.getReactorStyle() != RunConfig.ReactorStyle.NONE) {
+             File basedir = config.getExecutionDirectory();
+             MavenProject mp = NbMavenProject.getPartialProject(config.getMavenProject());
