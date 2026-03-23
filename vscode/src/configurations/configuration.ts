@@ -28,6 +28,7 @@ export const configKeys = {
     runConfigArguments: 'runConfig.arguments',
     runConfigCwd: 'runConfig.cwd',
     runConfigEnv: 'runConfig.env',
+    mavenUserSettings: 'maven.userSettings',
     verbose: 'verbose',
     userdir: 'userdir',
     revealInActivteProj: "revealActiveInProjects",
@@ -66,8 +67,8 @@ export const userConfigsListenedByServer = [
     appendPrefixToCommand(configKeys.hintPrefs),
     appendPrefixToCommand(configKeys.formatPrefs),
     appendPrefixToCommand(configKeys.importPrefs),
+    appendPrefixToCommand(configKeys.mavenUserSettings),
     appendPrefixToCommand(configKeys.projectJdkHome),
     appendPrefixToCommand(configKeys.runConfigVmOptions),
     appendPrefixToCommand(configKeys.runConfigCwd)
 ];
-

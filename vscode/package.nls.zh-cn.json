@@ -47,6 +47,7 @@
     "jdk.configuration.userdir.description.shareData": "在所有工作区之间共享数据（更有效）",
     "jdk.configuration.userdir.description.isolated": "每个工作区都有自己的数据（更具隔离性）",
     "jdk.configuration.userdir.deprecationMessage": "默认行为是每个工作区有单独的 userdir",
+    "jdk.configuration.maven.userSettings.description": "自定义 Maven 用户 settings.xml 文件的路径。留空则使用 Maven 默认的用户 settings 解析。",
     "jdk.configuration.revealActiveInProjects.description": "在项目视图中显示",
     "jdk.configuration.testEditor.description": "在编辑器中启用运行/调试测试",
     "jdk.configuration.javadoc.timeout.description": "在代码完成时加载 Javadoc 的超时（毫秒）（-1 表示无限制）",

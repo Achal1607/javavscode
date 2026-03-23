@@ -47,6 +47,7 @@
     "jdk.configuration.userdir.description.shareData": "Share data between all workspaces (more effective)",
     "jdk.configuration.userdir.description.isolated": "Each workspace has its own data (more isolated)",
     "jdk.configuration.userdir.deprecationMessage": "Separate userdir for each workspace is the default behaviour",
+    "jdk.configuration.maven.userSettings.description": "Path to a custom Maven user settings.xml file. Leave empty to use Maven default user settings resolution.",
     "jdk.configuration.revealActiveInProjects.description": "Reveals in Projects view",
     "jdk.configuration.testEditor.description": "Enable Run/Debug test in editor",
     "jdk.configuration.javadoc.timeout.description": "Timeout (in milliseconds) for loading Javadoc in code completion (-1 for unlimited)",

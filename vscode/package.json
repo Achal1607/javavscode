@@ -367,6 +367,11 @@
 						"default": "local",
 						"deprecationMessage": "%jdk.configuration.userdir.deprecationMessage%"
 					},
+					"jdk.maven.userSettings": {
+						"type": "string",
+						"default": "",
+						"description": "%jdk.configuration.maven.userSettings.description%"
+					},
 					"jdk.advanced.disable.nbjavac": {
 						"type": "boolean",
 						"default": false,
